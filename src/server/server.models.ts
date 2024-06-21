@@ -1,11 +1,14 @@
 import cors from 'cors';
 import express, { Application } from 'express';
-import { API_PATHS, DATABASE } from './server.constants';
+import { SEQUELIZE } from './server.constants';
+import {
+  BASIC_CARS_ROUTE,
+  basicCarsRouter,
+} from '../modules/cars-basic/routes/basic-cars.routes';
 
 export class Server {
   private app: Application = express();
   private readonly PORT: string = process.env.PORT!;
-  private readonly API_PATHS = API_PATHS;
 
   constructor() {
     this.databaseConnection();
@@ -15,7 +18,7 @@ export class Server {
 
   private async databaseConnection() {
     try {
-      await DATABASE.authenticate();
+      await SEQUELIZE.authenticate();
     } catch (error) {
       throw new Error(error as string);
     }
@@ -41,8 +44,7 @@ export class Server {
   }
 
   private routes() {
-    // TODO: Añadir rutas
-    // this.app.use(this.API_PATHS.auth, authRoutes)
+    this.app.use(BASIC_CARS_ROUTE, basicCarsRouter);
   }
 
   public listen() {
