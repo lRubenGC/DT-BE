@@ -33,3 +33,10 @@ export const getBasicCars = async (
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }
 };
+
+export const getBasicCar = async (
+  req: Request<{}, BasicCarDTO, BasicCarPayload>,
+  res: Response<BasicCarDTO>
+) => {
+  return getError(res, 500, ERROR.SERVER_ERROR, null, 'aa');
+};

@@ -14,7 +14,7 @@ export const getError = (
   res: Response,
   status: number,
   error: ERROR,
-  params: string[] | null = null,
+  params: any[] | null = null,
   errorLog?: unknown
 ) => {
   if (errorLog) console.error(errorLog);
