@@ -1,10 +1,11 @@
 import cors from 'cors';
 import express, { Application } from 'express';
-import { SEQUELIZE } from './server.constants';
+import { AUTH_ROUTE, authRouter } from '../modules/auth/routes/auth.routes';
 import {
   BASIC_CARS_ROUTE,
   basicCarsRouter,
 } from '../modules/cars-basic/routes/basic-cars.routes';
+import { SEQUELIZE } from './server.constants';
 
 export class Server {
   private app: Application = express();
@@ -44,6 +45,7 @@ export class Server {
   }
 
   private routes() {
+    this.app.use(AUTH_ROUTE, authRouter);
     this.app.use(BASIC_CARS_ROUTE, basicCarsRouter);
   }
 
