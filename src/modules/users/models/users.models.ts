@@ -7,10 +7,10 @@ export class User extends Model {
   email!: string;
   password!: string;
   status!: number;
-  recoverToken!: string | null;
-  recoverTokenDate!: Date | null;
-  img!: string;
-  csvDownloadDate!: Date | null;
+  recoverToken?: string | null;
+  recoverTokenDate?: Date | null;
+  img?: string;
+  csvDownloadDate?: Date | null;
 }
 
 User.init(
@@ -34,7 +34,7 @@ User.init(
     },
     status: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      defaultValue: 1,
     },
     recoverToken: {
       type: DataTypes.STRING,
@@ -44,7 +44,6 @@ User.init(
     },
     img: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     csvDownloadDate: {
       type: DataTypes.DATE,

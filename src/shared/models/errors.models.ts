@@ -4,21 +4,23 @@ import { ValidationError } from 'express-validator';
 export enum ERROR {
   SERVER_ERROR = 1,
   BAD_PAYLOAD = 2,
-  USERNAME_EXISTS = 3,
+  USERNAME_DUPLICATED = 3,
   USERNAME_BAD_PATTERN = 4,
-  EMAIL_EXISTS = 5,
+  EMAIL_DUPLICATED = 5,
   EMAIL_BAD_PATTERN = 6,
   PASSWORD_BAD_PATTERN = 7,
+  BAD_LOGIN = 8,
 }
 
 export const ERROR_MESSAGE = {
   [ERROR.SERVER_ERROR]: 'Internal server error',
   [ERROR.BAD_PAYLOAD]: 'Bad payload',
-  [ERROR.USERNAME_EXISTS]: 'Username exists',
+  [ERROR.USERNAME_DUPLICATED]: 'Duplicated username',
   [ERROR.USERNAME_BAD_PATTERN]: 'Not a valid username pattern',
-  [ERROR.EMAIL_EXISTS]: 'Email exists',
+  [ERROR.EMAIL_DUPLICATED]: 'Duplicated email',
   [ERROR.EMAIL_BAD_PATTERN]: 'Not a valid email pattern',
   [ERROR.PASSWORD_BAD_PATTERN]: 'Not a valid password pattern',
+  [ERROR.BAD_LOGIN]: 'Not valid credentials',
 };
 
 export const getError = (
