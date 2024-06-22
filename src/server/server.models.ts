@@ -1,11 +1,13 @@
 import cors from 'cors';
-import express, { Application } from 'express';
+import express, { Application, NextFunction, Request, Response } from 'express';
 import { AUTH_ROUTE, authRouter } from '../modules/auth/routes/auth.routes';
 import {
   BASIC_CARS_ROUTE,
   basicCarsRouter,
 } from '../modules/cars-basic/routes/basic-cars.routes';
 import { SEQUELIZE } from './server.constants';
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 export class Server {
   private app: Application = express();
@@ -31,6 +33,11 @@ export class Server {
     // Lectura del body
     this.app.use(express.json({ limit: '2mb' }));
     this.app.use(express.urlencoded({ limit: '2mb', extended: true }));
+    // Cookies - JWT
+    this.app.use(cookieParser());
+    this.app.use((req: Request, res: Response, next: NextFunction) =>
+      this.setUserInSession(req, next)
+    );
     // Carpeta pública
     this.app.use(express.static('src/public'));
     // TODO: (Mirar esto) Fileupload - Carga de archivos
@@ -42,6 +49,18 @@ export class Server {
     //     },
     //   })
     // );
+  }
+
+  private setUserInSession(req: Request, next: NextFunction) {
+    {
+      const token = req.cookies.access_token;
+      req.session = { user: null };
+      try {
+        const data = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
+        req.session.user = data;
+      } catch {}
+      next();
+    }
   }
 
   private routes() {
