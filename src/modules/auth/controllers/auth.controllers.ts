@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ERROR, getError } from '../../../shared/models/errors.models';
 import { IResponse } from '../../../shared/models/response.models';
 import { User } from '../../users/models/users.models';
+import { ACCESS_TOKEN } from '../models/auth.constants';
 import { LoginPayload, RegisterPayload } from '../models/auth.models';
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
@@ -31,7 +32,7 @@ export const login = async (
       }
     );
     return res
-      .cookie('access_token', token, {
+      .cookie(ACCESS_TOKEN, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
@@ -63,10 +64,6 @@ export const register = async (
   }
 };
 
-export const logout = async (req: Request, res: Response) => {
-  res.json('logout');
-};
-
-export const protectedRoute = async (req: Request, res: Response) => {
-  res.json('protectedRoute');
+export const logout = async (req: Request, res: Response<IResponse>) => {
+  res.clearCookie(ACCESS_TOKEN).json({ ok: true, data: null });
 };

@@ -8,12 +8,7 @@ import {
   isValidUsername,
 } from '../../../shared/middlewares/validate-auth';
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
-import {
-  login,
-  logout,
-  protectedRoute,
-  register,
-} from '../controllers/auth.controllers';
+import { login, logout, register } from '../controllers/auth.controllers';
 
 export const authRouter = Router();
 export const AUTH_ROUTE = '/api/auth';
@@ -42,5 +37,3 @@ authRouter.post(
 );
 
 authRouter.post('/logout', [validateErrors], logout);
-
-authRouter.post('/protected', [validateErrors], protectedRoute);
