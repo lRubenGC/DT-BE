@@ -5,14 +5,15 @@ import {
   BasicCarDTO,
   BasicCarPayload,
 } from '../models/basic-cars.models';
+import { IResponse } from '../../../shared/models/response.models';
 
 export const getBasicCars = async (
-  req: Request<{}, BasicCarDTO[], BasicCarPayload>,
-  res: Response<BasicCarDTO[]>
+  req: Request<{}, IResponse<BasicCarDTO[]>, BasicCarPayload>,
+  res: Response<IResponse<BasicCarDTO[]>>
 ) => {
-  const { year, mainSerie, userProperty } = req.body;
-  if (!year) return getError(res, 400, ERROR.BAD_PAYLOAD, ['year']);
   try {
+    const { year, mainSerie, userProperty } = req.body;
+    if (!year) return getError(res, 400, ERROR.BAD_PAYLOAD, ['year']);
     const cars: BasicCar[] = await BasicCar.findAll({
       where: {
         year,
@@ -28,15 +29,16 @@ export const getBasicCars = async (
           exclusive: 0,
         }) as BasicCarDTO
     );
-    return res.json(carsDTO);
+    return res.json({ ok: true, data: carsDTO });
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }
 };
 
 export const getBasicCar = async (
-  req: Request<{}, BasicCarDTO, BasicCarPayload>,
-  res: Response<BasicCarDTO>
+  req: Request<{}, IResponse<BasicCarDTO>, BasicCarPayload>,
+  res: Response<IResponse<BasicCarDTO>>
 ) => {
+  // TODO
   return getError(res, 500, ERROR.SERVER_ERROR, null, 'aa');
 };
