@@ -1,5 +1,10 @@
 import cors from 'cors';
 import express, { Application, NextFunction, Request, Response } from 'express';
+import {
+  ACCESS_TOKEN,
+  JWT_COOKIE_PROPS,
+  REFRESH_TOKEN,
+} from '../modules/auth/models/auth.constants';
 import { AUTH_ROUTE, authRouter } from '../modules/auth/routes/auth.routes';
 import {
   BASIC_CARS_ROUTE,
@@ -36,7 +41,7 @@ export class Server {
     // Cookies - JWT
     this.app.use(cookieParser());
     this.app.use((req: Request, res: Response, next: NextFunction) =>
-      this.setUserInSession(req, next)
+      this.setUserInSession(req, res, next)
     );
     // Carpeta pública
     this.app.use(express.static('src/public'));
@@ -51,16 +56,30 @@ export class Server {
     // );
   }
 
-  private setUserInSession(req: Request, next: NextFunction) {
-    {
-      const token = req.cookies.access_token;
-      req.session = { user: null };
+  // TODO: Probar esto mejor
+  private setUserInSession(req: Request, res: Response, next: NextFunction) {
+    req.session = { user: null };
+    const accessToken = req.cookies[ACCESS_TOKEN];
+    const refreshToken = req.cookies[REFRESH_TOKEN];
+    if (!accessToken && !refreshToken) return next();
+
+    try {
+      const user = jwt.verify(accessToken, process.env.SECRETORPRIVATEKEY);
+      req.session.user = user;
+      return next();
+    } catch (err) {
       try {
-        const data = jwt.verify(token, process.env.SECRETORPRIVATEKEY);
-        req.session.user = data;
-      } catch {}
-      next();
+        const user = jwt.verify(refreshToken, process.env.SECRETORPRIVATEKEY);
+        const newAccessToken = jwt.sign(
+          { id: user.id, email: user.email, username: user.username },
+          process.env.SECRETORPRIVATEKEY,
+          { expiresIn: '30m' }
+        );
+        res.cookie(ACCESS_TOKEN, newAccessToken, JWT_COOKIE_PROPS);
+        req.session.user = user;
+      } catch (error) {}
     }
+    next();
   }
 
   private routes() {

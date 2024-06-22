@@ -5,11 +5,11 @@ import {
   BasicCarDTO,
   BasicCarPayload,
 } from '../models/basic-cars.models';
-import { IResponse } from '../../../shared/models/response.models';
+import { ResponseDTO } from '../../../shared/models/response.models';
 
 export const getBasicCars = async (
-  req: Request<{}, IResponse<BasicCarDTO[]>, BasicCarPayload>,
-  res: Response<IResponse<BasicCarDTO[]>>
+  req: Request<{}, ResponseDTO<BasicCarDTO[]>, BasicCarPayload>,
+  res: Response<ResponseDTO<BasicCarDTO[]>>
 ) => {
   try {
     const { year, mainSerie, userProperty } = req.body;
@@ -36,9 +36,12 @@ export const getBasicCars = async (
 };
 
 export const getBasicCar = async (
-  req: Request<{}, IResponse<BasicCarDTO>, BasicCarPayload>,
-  res: Response<IResponse<BasicCarDTO>>
+  req: Request<{}, ResponseDTO<BasicCarDTO>, BasicCarPayload>,
+  res: Response<ResponseDTO<BasicCarDTO>>
 ) => {
-  // TODO
-  return getError(res, 500, ERROR.SERVER_ERROR, null, 'aa');
+  try {
+    return res.json();
+  } catch (error) {
+    return getError(res, 500, ERROR.SERVER_ERROR, null, error);
+  }
 };

@@ -1,4 +1,4 @@
-export interface IResponse<T = null> {
+export interface ResponseDTO<T = null> {
   ok: boolean;
   data: T;
 }

@@ -1,15 +1,19 @@
 import { Request, Response } from 'express';
 import { ERROR, getError } from '../../../shared/models/errors.models';
-import { IResponse } from '../../../shared/models/response.models';
+import { ResponseDTO } from '../../../shared/models/response.models';
 import { User } from '../../users/models/users.models';
-import { ACCESS_TOKEN } from '../models/auth.constants';
+import {
+  ACCESS_TOKEN,
+  JWT_COOKIE_PROPS,
+  REFRESH_TOKEN,
+} from '../models/auth.constants';
 import { LoginPayload, RegisterPayload } from '../models/auth.models';
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 
 export const login = async (
-  req: Request<{}, IResponse<User>, LoginPayload>,
-  res: Response<IResponse<User>>
+  req: Request<{}, ResponseDTO<User>, LoginPayload>,
+  res: Response<ResponseDTO<User>>
 ) => {
   try {
     const { email, password } = req.body;
@@ -24,19 +28,19 @@ export const login = async (
     if (!validPassword) {
       return getError(res, 401, ERROR.BAD_LOGIN);
     }
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
       process.env.SECRETORPRIVATEKEY,
-      {
-        expiresIn: '1h',
-      }
+      { expiresIn: '30m' }
+    );
+    const refreshToken = jwt.sign(
+      { id: user.id, email: user.email, username: user.username },
+      process.env.SECRETORPRIVATEKEY,
+      { expiresIn: '90d' }
     );
     return res
-      .cookie(ACCESS_TOKEN, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-      })
+      .cookie(ACCESS_TOKEN, accessToken, JWT_COOKIE_PROPS)
+      .cookie(REFRESH_TOKEN, refreshToken, JWT_COOKIE_PROPS)
       .json({ ok: true, data: user });
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
@@ -44,8 +48,8 @@ export const login = async (
 };
 
 export const register = async (
-  req: Request<{}, IResponse<User>, RegisterPayload>,
-  res: Response<IResponse<User>>
+  req: Request<{}, ResponseDTO<User>, RegisterPayload>,
+  res: Response<ResponseDTO<User>>
 ) => {
   try {
     const { email, password, username } = req.body;
@@ -64,6 +68,9 @@ export const register = async (
   }
 };
 
-export const logout = async (req: Request, res: Response<IResponse>) => {
-  res.clearCookie(ACCESS_TOKEN).json({ ok: true, data: null });
+export const logout = async (req: Request, res: Response<ResponseDTO>) => {
+  res
+    .clearCookie(ACCESS_TOKEN)
+    .clearCookie(REFRESH_TOKEN)
+    .json({ ok: true, data: null });
 };
