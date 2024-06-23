@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import { SEQUELIZE } from '../../../server/server.constants';
 import { USER_PROPERTY } from '../../../shared/models/cars.models';
 
+//#region SEQUELIZE
 export class BasicCar extends Model {
   id!: number;
   car_id!: string;
@@ -15,20 +16,6 @@ export class BasicCar extends Model {
   brand!: string;
   img!: string;
 }
-
-export interface BasicCarDTO extends BasicCar {
-  has_car: boolean;
-  wants_car: boolean;
-  exclusive: number;
-}
-
-export class BasicCarPayload {
-  year: number = 2024;
-  mainSerie?: string | null = null;
-  exclusiveSerie?: string | null = null;
-  userProperty?: USER_PROPERTY | null = null;
-}
-
 BasicCar.init(
   {
     id: {
@@ -83,3 +70,16 @@ BasicCar.init(
     timestamps: false,
   }
 );
+//#endregion SEQUELIZE
+
+export interface BasicCarDTO extends BasicCar {
+  has_car: boolean;
+  wants_car: boolean;
+}
+
+export class BasicCarPayload {
+  year: number = 2024;
+  mainSerie?: string | null = null;
+  exclusiveSerie?: string | null = null;
+  userProperty?: USER_PROPERTY | null = null;
+}

@@ -1,23 +1,37 @@
 import { Request, Response } from 'express';
+import { WhereOptions } from 'sequelize';
 import { ERROR, getError } from '../../../shared/models/errors.models';
+import { ResponseDTO } from '../../../shared/models/response.models';
+import { getSeriesFilters } from '../functions/filters';
+import { isValidYear } from '../functions/validations';
 import {
   BasicCar,
   BasicCarDTO,
   BasicCarPayload,
 } from '../models/basic-cars.models';
-import { ResponseDTO } from '../../../shared/models/response.models';
 
 export const getBasicCars = async (
   req: Request<{}, ResponseDTO<BasicCarDTO[]>, BasicCarPayload>,
   res: Response<ResponseDTO<BasicCarDTO[]>>
 ) => {
   try {
-    const { year, mainSerie, userProperty } = req.body;
-    if (!year) return getError(res, 400, ERROR.BAD_PAYLOAD, ['year']);
+    //#region VALIDATIONS
+    const { year, mainSerie, exclusiveSerie, userProperty } = req.body;
+    if (!year || !isValidYear(year)) {
+      return getError(res, 400, ERROR.BAD_PAYLOAD, ['year']);
+    }
+    //#endregion VALIDATIONS
+
+    //#region FILTERS
+    const where: WhereOptions = {
+      year,
+      ...getSeriesFilters(mainSerie, exclusiveSerie),
+    };
+    //#endregion FILTERS
+
+    //#region QUERIES
     const cars: BasicCar[] = await BasicCar.findAll({
-      where: {
-        year,
-      },
+      where,
       raw: true,
     });
     const carsDTO: BasicCarDTO[] = cars.map(
@@ -26,9 +40,9 @@ export const getBasicCars = async (
           ...car,
           has_car: false,
           wants_car: false,
-          exclusive: 0,
         }) as BasicCarDTO
     );
+    //#endregion QUERIES
     return res.json({ ok: true, data: carsDTO });
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
