@@ -9,6 +9,7 @@ export class BasicCar extends Model {
   model_name!: string;
   version!: string;
   series!: string;
+  exclusive_serie!: string | null;
   col_serie!: string;
   year!: number;
   brand!: string;
@@ -24,10 +25,8 @@ export interface BasicCarDTO extends BasicCar {
 export class BasicCarPayload {
   year: number = 2024;
   mainSerie?: string | null = null;
+  exclusiveSerie?: string | null = null;
   userProperty?: USER_PROPERTY | null = null;
-  constructor(props: BasicCarPayload) {
-    Object.assign(this, props);
-  }
 }
 
 BasicCar.init(
@@ -56,6 +55,9 @@ BasicCar.init(
     series: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    exclusive_serie: {
+      type: DataTypes.STRING,
     },
     col_serie: {
       type: DataTypes.STRING,
