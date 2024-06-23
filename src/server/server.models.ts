@@ -2,6 +2,7 @@ import cors from 'cors';
 import express, { Application, NextFunction, Request, Response } from 'express';
 import {
   ACCESS_TOKEN,
+  ACCESS_TOKEN_EXPIRATION,
   JWT_COOKIE_PROPS,
   REFRESH_TOKEN,
 } from '../modules/auth/models/auth.constants';
@@ -56,7 +57,6 @@ export class Server {
     // );
   }
 
-  // TODO: Probar esto mejor
   private setUserInSession(req: Request, res: Response, next: NextFunction) {
     req.session = { user: null };
     const accessToken = req.cookies[ACCESS_TOKEN];
@@ -73,7 +73,7 @@ export class Server {
         const newAccessToken = jwt.sign(
           { id: user.id, email: user.email, username: user.username },
           process.env.SECRETORPRIVATEKEY,
-          { expiresIn: '30m' }
+          { expiresIn: ACCESS_TOKEN_EXPIRATION }
         );
         res.cookie(ACCESS_TOKEN, newAccessToken, JWT_COOKIE_PROPS);
         req.session.user = user;

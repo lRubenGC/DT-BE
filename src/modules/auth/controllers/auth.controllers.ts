@@ -4,8 +4,10 @@ import { ResponseDTO } from '../../../shared/models/response.models';
 import { User } from '../../users/models/users.models';
 import {
   ACCESS_TOKEN,
+  ACCESS_TOKEN_EXPIRATION,
   JWT_COOKIE_PROPS,
   REFRESH_TOKEN,
+  REFRESH_TOKEN_EXPIRATION,
 } from '../models/auth.constants';
 import { LoginPayload, RegisterPayload } from '../models/auth.models';
 const jwt = require('jsonwebtoken');
@@ -31,12 +33,12 @@ export const login = async (
     const accessToken = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
       process.env.SECRETORPRIVATEKEY,
-      { expiresIn: '30m' }
+      { expiresIn: ACCESS_TOKEN_EXPIRATION }
     );
     const refreshToken = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
       process.env.SECRETORPRIVATEKEY,
-      { expiresIn: '90d' }
+      { expiresIn: REFRESH_TOKEN_EXPIRATION }
     );
     return res
       .cookie(ACCESS_TOKEN, accessToken, JWT_COOKIE_PROPS)
