@@ -77,9 +77,14 @@ export interface BasicCarDTO extends BasicCar {
   wants_car: boolean;
 }
 
-export class BasicCarPayload {
-  year: number = 2024;
-  mainSerie?: string | null = null;
-  exclusiveSerie?: string | null = null;
-  userProperty?: USER_PROPERTY | null = null;
+export interface BasicCarResponse {
+  cars: BasicCarDTO[];
+  filters: BasicCarPayload | null;
+}
+
+export interface BasicCarPayload {
+  year: number;
+  mainSerie?: string | null;
+  exclusiveSerie?: string | null;
+  userProperty?: USER_PROPERTY | null;
 }

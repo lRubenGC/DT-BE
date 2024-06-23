@@ -1,14 +1,11 @@
 import express from 'express';
+import { SessionUser } from './src/shared/models/session.models';
 
 declare global {
   namespace Express {
     interface Request {
       session: {
-        user: {
-          id: number;
-          email: string;
-          username: string;
-        } | null;
+        user: SessionUser | null;
       };
     }
   }
