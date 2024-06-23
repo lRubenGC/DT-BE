@@ -6,12 +6,12 @@ import { UserFilters } from '../models/user-filters.models';
  * @param filterValue null ? deletes filter in DB; returns null
  * @param filterValue value ? saves it in DB; returns it
  */
-export const getFilter = async (
+export const getFilter = async <TValue>(
   user: SessionUser,
   page: string,
-  filterValue: undefined | null | string,
+  filterValue: undefined | null | TValue,
   filterName: string
-): Promise<string | null> => {
+): Promise<TValue | null> => {
   const userFilters = await UserFilters.findOne({
     where: {
       user_id: user.id,

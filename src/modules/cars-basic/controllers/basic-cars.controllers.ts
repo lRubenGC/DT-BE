@@ -24,15 +24,15 @@ export const getBasicCars = async (
     const { year, mainSerie, exclusiveSerie, userProperty } = req.body;
     const { user } = req.session;
 
-    //#region SAVE / GET FILTERS
+    //#region GET / SAVE FILTERS
     let yearToFilter: number = BASIC_DEFAULT_YEAR;
     let mainSerieToFilter: string | null = null;
     let exclusiveSerieToFilter: string | null = null;
-    //TODO: Implement USER PROPERTY
     let userPropertyToFilter: USER_PROPERTY | null = null;
     if (user) {
-      // TODO: Implement YEAR
-      // yearToFilter = await getFilter(user, BASIC_CARS_PAGE, year + '', 'year');
+      yearToFilter =
+        (await getFilter(user, BASIC_CARS_PAGE, year, 'year')) ??
+        BASIC_DEFAULT_YEAR;
       mainSerieToFilter = await getFilter(
         user,
         BASIC_CARS_PAGE,
@@ -45,21 +45,29 @@ export const getBasicCars = async (
         exclusiveSerie,
         'exclusiveSerie'
       );
+      userPropertyToFilter = await getFilter(
+        user,
+        BASIC_CARS_PAGE,
+        userProperty,
+        'userProperty'
+      );
     }
-    //#endregion SAVE / GET FILTERS
+    //#endregion GET / SAVE FILTERS
 
-    //#region FILTERS
+    //#region QUERY FILTERS
     const where: WhereOptions = {
       year: yearToFilter,
       ...getSeriesFilters(mainSerieToFilter, exclusiveSerieToFilter),
     };
-    //#endregion FILTERS
+    //#endregion QUERY FILTERS
 
     //#region QUERIES
-    const cars: BasicCar[] = await BasicCar.findAll({
-      where,
-      raw: true,
-    });
+    const cars: BasicCar[] = await BasicCar.findAll({ where, raw: true });
+    // ! const userCars: UserBasicCar[] = await UserBasicCar.findAll({ where, raw: true });
+    //#endregion QUERIES
+
+    //#region CARS MAP
+    // TODO: We are here
     const carsDTO: BasicCarDTO[] = cars.map(
       car =>
         ({
@@ -68,7 +76,8 @@ export const getBasicCars = async (
           wants_car: false,
         }) as BasicCarDTO
     );
-    //#endregion QUERIES
+    //#endregion CARS MAP
+
     return res.json({
       ok: true,
       data: {
