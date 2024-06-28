@@ -15,6 +15,8 @@ export class BasicCar extends Model {
   year!: number;
   brand!: string;
   img!: string;
+  hasCar!: number;
+  wantsCar!: number;
 }
 BasicCar.init(
   {
@@ -56,7 +58,6 @@ BasicCar.init(
     },
     brand: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     img: {
       type: DataTypes.STRING,
@@ -72,13 +73,8 @@ BasicCar.init(
 );
 //#endregion SEQUELIZE
 
-export interface BasicCarDTO extends BasicCar {
-  has_car: boolean;
-  wants_car: boolean;
-}
-
 export interface BasicCarResponse {
-  cars: BasicCarDTO[];
+  cars: BasicCar[];
   filters: BasicCarPayload | null;
 }
 

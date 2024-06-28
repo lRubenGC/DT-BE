@@ -1,17 +1,18 @@
 import { Request, Response } from 'express';
-import { WhereOptions } from 'sequelize';
+import { Sequelize, WhereOptions } from 'sequelize';
 import { USER_PROPERTY } from '../../../shared/models/cars.models';
 import { ERROR, getError } from '../../../shared/models/errors.models';
 import { ResponseDTO } from '../../../shared/models/response.models';
 import { getFilter } from '../../user-filters/functions/user-filters.functions';
+import { User } from '../../users/models/users.models';
 import { getSeriesFilters } from '../functions/filters';
+import { UserBasicCar } from '../models/basic-cars-relations.models';
 import {
   BASIC_CARS_PAGE,
   BASIC_DEFAULT_YEAR,
 } from '../models/basic-cars.constants';
 import {
   BasicCar,
-  BasicCarDTO,
   BasicCarPayload,
   BasicCarResponse,
 } from '../models/basic-cars.models';
@@ -28,6 +29,7 @@ export const getBasicCars = async (
     let yearToFilter: number = BASIC_DEFAULT_YEAR;
     let mainSerieToFilter: string | null = null;
     let exclusiveSerieToFilter: string | null = null;
+    // ! Falta implementar el userPropertyFilter
     let userPropertyToFilter: USER_PROPERTY | null = null;
     if (user) {
       yearToFilter =
@@ -62,26 +64,38 @@ export const getBasicCars = async (
     //#endregion QUERY FILTERS
 
     //#region QUERIES
-    const cars: BasicCar[] = await BasicCar.findAll({ where, raw: true });
-    // ! const userCars: UserBasicCar[] = await UserBasicCar.findAll({ where, raw: true });
+    let cars: BasicCar[] = [];
+    if (user) {
+      BasicCar.belongsToMany(User, { through: UserBasicCar });
+      User.belongsToMany(BasicCar, { through: UserBasicCar });
+      cars = await BasicCar.findAll({
+        where,
+        include: [
+          {
+            model: User,
+            through: {
+              attributes: ['hasCar', 'wantsCar'],
+              where: { UserId: user.id },
+            },
+            attributes: [],
+          },
+        ],
+        attributes: {
+          include: [
+            [Sequelize.col('Users.UserBasicCar.hasCar'), 'hasCar'],
+            [Sequelize.col('Users.UserBasicCar.wantsCar'), 'wantsCar'],
+          ],
+        },
+      });
+    } else {
+      cars = await BasicCar.findAll({ where });
+    }
     //#endregion QUERIES
-
-    //#region CARS MAP
-    // TODO: We are here
-    const carsDTO: BasicCarDTO[] = cars.map(
-      car =>
-        ({
-          ...car,
-          has_car: false,
-          wants_car: false,
-        }) as BasicCarDTO
-    );
-    //#endregion CARS MAP
 
     return res.json({
       ok: true,
       data: {
-        cars: carsDTO,
+        cars,
         filters: {
           year: yearToFilter,
           mainSerie: mainSerieToFilter,
@@ -96,8 +110,8 @@ export const getBasicCars = async (
 };
 
 export const getBasicCar = async (
-  req: Request<{}, ResponseDTO<BasicCarDTO>, BasicCarPayload>,
-  res: Response<ResponseDTO<BasicCarDTO>>
+  req: Request<{}, ResponseDTO<BasicCar>, BasicCarPayload>,
+  res: Response<ResponseDTO<BasicCar>>
 ) => {
   try {
     return res.json();
