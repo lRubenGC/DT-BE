@@ -10,12 +10,17 @@ import { UserFilters } from '../models/user-filters.models';
  */
 export const getFilter = async <TValue>(
   user: SessionUser | null,
-  userFilters: UserFilters | null,
   page: string,
   filterValue: undefined | null | TValue,
   filterName: string
 ): Promise<TValue | null> => {
   if (!user) return filterValue ?? null;
+  const userFilters = await UserFilters.findOne({
+    where: {
+      user_id: user.id,
+      page,
+    },
+  });
   const userFiltersObj = userFilters ? JSON.parse(userFilters.filters) : {};
   if (filterValue === undefined && userFilters) {
     return userFiltersObj[filterName];
@@ -26,7 +31,6 @@ export const getFilter = async <TValue>(
       userFiltersObj[filterName] = filterValue;
     }
     const filters = JSON.stringify(userFiltersObj);
-    // console.log(!!userFilters);
     if (userFilters) {
       await userFilters.update({ filters });
     } else {

@@ -24,34 +24,22 @@ export const getBasicCars = async (
     const { user } = req.session;
 
     //#region GET / SAVE FILTERS
-    const userFilters = user
-      ? await UserFilters.findOne({
-          where: {
-            user_id: user.id,
-            page: BASIC_CARS_PAGE,
-          },
-        })
-      : null;
     const yearToFilter =
-      (await getFilter(user, userFilters, BASIC_CARS_PAGE, year, 'year')) ??
-      BASIC_DEFAULT_YEAR;
+      (await getFilter(user, BASIC_CARS_PAGE, year, 'year')) ?? BASIC_DEFAULT_YEAR;
     const mainSerieToFilter = await getFilter(
       user,
-      userFilters,
       BASIC_CARS_PAGE,
       mainSerie,
       'mainSerie'
     );
     const exclusiveSerieToFilter = await getFilter(
       user,
-      userFilters,
       BASIC_CARS_PAGE,
       exclusiveSerie,
       'exclusiveSerie'
     );
     const userPropertyToFilter = await getFilter(
       user,
-      userFilters,
       BASIC_CARS_PAGE,
       userProperty,
       'userProperty'
