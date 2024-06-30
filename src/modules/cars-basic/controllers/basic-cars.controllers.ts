@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { Sequelize, WhereOptions } from 'sequelize';
+import { USER_PROPERTY } from '../../../shared/models/cars.models';
 import { ERROR, getError } from '../../../shared/models/errors.models';
-import { ResponseDTO } from '../../../shared/models/response.models';
+import { ResponseDTO, getResponse } from '../../../shared/models/response.models';
 import {
-  getFilter,
+  getFilters,
   getUserPropertyCondition,
 } from '../../user-filters/functions/user-filters.functions';
-import { UserFilters } from '../../user-filters/models/user-filters.models';
 import { User } from '../../users/models/users.models';
 import { getSeriesFilters } from '../functions/get-series-filters';
 import { UserBasicCar } from '../models/basic-cars-relations.models';
@@ -18,53 +18,51 @@ export const getBasicCars = async (
   res: Response<ResponseDTO<BasicCarResponse>>
 ) => {
   try {
+    //#region READONLY
     BasicCar.belongsToMany(User, { through: UserBasicCar });
     User.belongsToMany(BasicCar, { through: UserBasicCar });
     const { year, mainSerie, exclusiveSerie, userProperty } = req.body;
     const { user } = req.session;
+    //#endregion READONLY
 
-    //#region GET / SAVE FILTERS
-    const yearToFilter =
-      (await getFilter(user, BASIC_CARS_PAGE, year, 'year')) ?? BASIC_DEFAULT_YEAR;
-    const mainSerieToFilter = await getFilter(
+    //#region FILTERS STORAGED
+    const {
+      yearToFilter,
+      mainSerieToFilter,
+      exclusiveSerieToFilter,
+      userPropertyToFilter,
+    } = (await getFilters(
       user,
       BASIC_CARS_PAGE,
-      mainSerie,
-      'mainSerie'
-    );
-    const exclusiveSerieToFilter = await getFilter(
-      user,
-      BASIC_CARS_PAGE,
-      exclusiveSerie,
-      'exclusiveSerie'
-    );
-    const userPropertyToFilter = await getFilter(
-      user,
-      BASIC_CARS_PAGE,
-      userProperty,
-      'userProperty'
-    );
-    //#endregion GET / SAVE FILTERS
+      [year, mainSerie, exclusiveSerie, userProperty],
+      ['year', 'mainSerie', 'exclusiveSerie', 'userProperty']
+    )) as {
+      yearToFilter: number | null;
+      mainSerieToFilter: string | null;
+      exclusiveSerieToFilter: string | null;
+      userPropertyToFilter: USER_PROPERTY | null;
+    };
+    //#endregion FILTERS STORAGED
 
-    //#region QUERY FILTERS
-    const filters: WhereOptions = {
-      year: yearToFilter,
+    //#region FILTERS QUERIES
+    const coreFilters: WhereOptions = {
+      year: yearToFilter ?? BASIC_DEFAULT_YEAR,
       ...getSeriesFilters(mainSerieToFilter, exclusiveSerieToFilter),
     };
-    const userPropertyFilters =
+    const userPropertyFilter =
       user && userPropertyToFilter
         ? getUserPropertyCondition(userPropertyToFilter, 'UserBasicCar')
         : null;
-    if (userPropertyFilters && userPropertyFilters.error) {
+    if (userPropertyFilter && userPropertyFilter.error) {
       return getError(res, 400, ERROR.BAD_PAYLOAD, ['UserProperty']);
     }
-    //#endregion QUERY FILTERS
+    //#endregion FILTERS QUERIES
 
-    //#region QUERIES
-    let cars: BasicCar[] = [];
+    //#region FINAL QUERY
+    let cars: BasicCar[];
     if (user) {
       cars = await BasicCar.findAll({
-        where: { ...filters, ...userPropertyFilters },
+        where: { ...coreFilters, ...userPropertyFilter },
         include: [
           {
             model: User,
@@ -83,20 +81,17 @@ export const getBasicCars = async (
         },
       });
     } else {
-      cars = await BasicCar.findAll({ where: filters });
+      cars = await BasicCar.findAll({ where: coreFilters });
     }
-    //#endregion QUERIES
+    //#endregion FINAL QUERY
 
-    return res.json({
-      ok: true,
-      data: {
-        cars,
-        filters: {
-          year: yearToFilter,
-          mainSerie: mainSerieToFilter,
-          exclusiveSerie: exclusiveSerieToFilter,
-          userProperty: userPropertyToFilter,
-        },
+    return getResponse(res, {
+      cars,
+      filters: {
+        year: yearToFilter ?? BASIC_DEFAULT_YEAR,
+        mainSerie: mainSerieToFilter,
+        exclusiveSerie: exclusiveSerieToFilter,
+        userProperty: user ? userPropertyToFilter : null,
       },
     });
   } catch (error) {

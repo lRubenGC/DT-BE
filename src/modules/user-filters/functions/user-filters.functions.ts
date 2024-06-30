@@ -4,17 +4,23 @@ import { SessionUser } from '../../../shared/models/session.models';
 import { UserFilters } from '../models/user-filters.models';
 
 /**
- * @param filterValue undefined ? finds it in DB; returns filter of DB
- * @param filterValue null ? deletes filter in DB; returns null
- * @param filterValue value ? saves it in DB; returns it
+ * @param filterValue undefined ? takes it of DB
+ * @param filterValue null ? deletes filter in DB
+ * @param filterValue value ? saves it in DB and takes it
  */
-export const getFilter = async <TValue>(
+export const getFilters = async <TValue>(
   user: SessionUser | null,
   page: string,
-  filterValue: undefined | null | TValue,
-  filterName: string
-): Promise<TValue | null> => {
-  if (!user) return filterValue ?? null;
+  filterValues: (undefined | null | TValue)[],
+  filterNames: string[]
+): Promise<{ [key: string]: TValue | null }> => {
+  if (!user) {
+    return filterNames.reduce<{ [key: string]: TValue | null }>((acc, name, index) => {
+      acc[`${name}ToFilter`] = filterValues[index] ?? null;
+      return acc;
+    }, {});
+  }
+
   const userFilters = await UserFilters.findOne({
     where: {
       user_id: user.id,
@@ -22,14 +28,22 @@ export const getFilter = async <TValue>(
     },
   });
   const userFiltersObj = userFilters ? JSON.parse(userFilters.filters) : {};
-  if (filterValue === undefined && userFilters) {
-    return userFiltersObj[filterName];
-  } else if (filterValue !== undefined) {
-    if (filterValue === null) {
-      delete userFiltersObj[filterName];
-    } else {
-      userFiltersObj[filterName] = filterValue;
-    }
+  const result = filterNames.reduce<{ [key: string]: TValue | null }>(
+    (acc, name, index) => {
+      if (filterValues[index] === undefined && !!userFiltersObj[name]) {
+        acc[`${name}ToFilter`] = userFiltersObj[name];
+      } else if (!!filterValues[index]) {
+        acc[`${name}ToFilter`] = filterValues[index]!;
+        userFiltersObj[name] = filterValues[index];
+      } else {
+        delete userFiltersObj[name];
+      }
+      return acc;
+    },
+    {}
+  );
+
+  if (Object.keys(userFiltersObj).length > 0) {
     const filters = JSON.stringify(userFiltersObj);
     if (userFilters) {
       await userFilters.update({ filters });
@@ -40,17 +54,18 @@ export const getFilter = async <TValue>(
         filters,
       });
     }
-    return filterValue;
+  } else if (userFilters) {
+    await userFilters.destroy();
   }
-  return null;
+  return result;
 };
 
 export const getUserPropertyCondition = (
   userPropertyToFilter: USER_PROPERTY,
-  table: string
+  model: string
 ) => {
-  const hasCar = `$Users.${table}.hasCar$`;
-  const wantsCar = `$Users.${table}.wantsCar$`;
+  const hasCar = `$Users.${model}.hasCar$`;
+  const wantsCar = `$Users.${model}.wantsCar$`;
   if (userPropertyToFilter === USER_PROPERTY.OWNED) {
     return {
       [Op.or]: [{ [hasCar]: 1 }],
