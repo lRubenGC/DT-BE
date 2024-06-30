@@ -41,7 +41,10 @@ export const getFilter = async <TValue>(
   return null;
 };
 
-export const getUserPropertyCondition = (userPropertyToFilter: USER_PROPERTY, table: string) => {
+export const getUserPropertyCondition = (
+  userPropertyToFilter: USER_PROPERTY,
+  table: string
+) => {
   const hasCar = `$Users.${table}.hasCar$`;
   const wantsCar = `$Users.${table}.wantsCar$`;
   if (userPropertyToFilter === USER_PROPERTY.OWNED) {

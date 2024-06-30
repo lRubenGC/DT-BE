@@ -1,8 +1,5 @@
 import { Router } from 'express';
-import {
-  getBasicCar,
-  getBasicCars,
-} from '../controllers/basic-cars.controllers';
+import { getBasicCar, getBasicCars } from '../controllers/basic-cars.controllers';
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
 
 export const basicCarsRouter = Router();

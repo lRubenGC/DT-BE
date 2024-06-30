@@ -23,10 +23,7 @@ export const login = async (
     if (!user) {
       return getError(res, 401, ERROR.BAD_LOGIN);
     }
-    const validPassword = bcryptjs.compareSync(
-      password.toString(),
-      user.password
-    );
+    const validPassword = bcryptjs.compareSync(password.toString(), user.password);
     if (!validPassword) {
       return getError(res, 401, ERROR.BAD_LOGIN);
     }
@@ -55,10 +52,7 @@ export const register = async (
 ) => {
   try {
     const { email, password, username } = req.body;
-    const encryptedPassword = bcryptjs.hashSync(
-      password,
-      bcryptjs.genSaltSync()
-    );
+    const encryptedPassword = bcryptjs.hashSync(password, bcryptjs.genSaltSync());
     const user = await User.create({
       username,
       email,
@@ -71,7 +65,7 @@ export const register = async (
 };
 
 export const logout = async (req: Request, res: Response<ResponseDTO>) => {
-  res
+  return res
     .clearCookie(ACCESS_TOKEN)
     .clearCookie(REFRESH_TOKEN)
     .json({ ok: true, data: null });

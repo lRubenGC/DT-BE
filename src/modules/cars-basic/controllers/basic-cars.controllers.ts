@@ -2,7 +2,10 @@ import { Request, Response } from 'express';
 import { Sequelize, WhereOptions } from 'sequelize';
 import { ERROR, getError } from '../../../shared/models/errors.models';
 import { ResponseDTO } from '../../../shared/models/response.models';
-import { getFilter, getUserPropertyCondition } from '../../user-filters/functions/user-filters.functions';
+import {
+  getFilter,
+  getUserPropertyCondition,
+} from '../../user-filters/functions/user-filters.functions';
 import { UserFilters } from '../../user-filters/models/user-filters.models';
 import { User } from '../../users/models/users.models';
 import { getSeriesFilters } from '../functions/get-series-filters';
@@ -29,10 +32,30 @@ export const getBasicCars = async (
           },
         })
       : null;
-    const yearToFilter = (await getFilter(user, userFilters, BASIC_CARS_PAGE, year, 'year')) ?? BASIC_DEFAULT_YEAR;
-    const mainSerieToFilter = await getFilter(user, userFilters, BASIC_CARS_PAGE, mainSerie, 'mainSerie');
-    const exclusiveSerieToFilter = await getFilter(user, userFilters, BASIC_CARS_PAGE, exclusiveSerie, 'exclusiveSerie');
-    const userPropertyToFilter = await getFilter(user, userFilters, BASIC_CARS_PAGE, userProperty, 'userProperty');
+    const yearToFilter =
+      (await getFilter(user, userFilters, BASIC_CARS_PAGE, year, 'year')) ??
+      BASIC_DEFAULT_YEAR;
+    const mainSerieToFilter = await getFilter(
+      user,
+      userFilters,
+      BASIC_CARS_PAGE,
+      mainSerie,
+      'mainSerie'
+    );
+    const exclusiveSerieToFilter = await getFilter(
+      user,
+      userFilters,
+      BASIC_CARS_PAGE,
+      exclusiveSerie,
+      'exclusiveSerie'
+    );
+    const userPropertyToFilter = await getFilter(
+      user,
+      userFilters,
+      BASIC_CARS_PAGE,
+      userProperty,
+      'userProperty'
+    );
     //#endregion GET / SAVE FILTERS
 
     //#region QUERY FILTERS
@@ -41,8 +64,12 @@ export const getBasicCars = async (
       ...getSeriesFilters(mainSerieToFilter, exclusiveSerieToFilter),
     };
     const userPropertyFilters =
-      user && userPropertyToFilter ? getUserPropertyCondition(userPropertyToFilter, 'UserBasicCar') : null;
-    if (userPropertyFilters && userPropertyFilters.error) return getError(res, 400, ERROR.BAD_PAYLOAD, ['UserProperty']);
+      user && userPropertyToFilter
+        ? getUserPropertyCondition(userPropertyToFilter, 'UserBasicCar')
+        : null;
+    if (userPropertyFilters && userPropertyFilters.error) {
+      return getError(res, 400, ERROR.BAD_PAYLOAD, ['UserProperty']);
+    }
     //#endregion QUERY FILTERS
 
     //#region QUERIES

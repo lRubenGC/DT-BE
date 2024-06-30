@@ -42,10 +42,7 @@ export const getError = (
   });
 };
 
-export const getMiddlewareErrors = (
-  res: Response,
-  errors: ValidationError[]
-) => {
+export const getMiddlewareErrors = (res: Response, errors: ValidationError[]) => {
   return res.status(400).json({
     ok: false,
     errors: errors.map(({ msg }) => ({
