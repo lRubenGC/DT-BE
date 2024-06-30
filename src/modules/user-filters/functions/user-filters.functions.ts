@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+import { USER_PROPERTY } from '../../../shared/models/cars.models';
 import { SessionUser } from '../../../shared/models/session.models';
 import { UserFilters } from '../models/user-filters.models';
 
@@ -7,17 +9,13 @@ import { UserFilters } from '../models/user-filters.models';
  * @param filterValue value ? saves it in DB; returns it
  */
 export const getFilter = async <TValue>(
-  user: SessionUser,
+  user: SessionUser | null,
+  userFilters: UserFilters | null,
   page: string,
   filterValue: undefined | null | TValue,
   filterName: string
 ): Promise<TValue | null> => {
-  const userFilters = await UserFilters.findOne({
-    where: {
-      user_id: user.id,
-      page,
-    },
-  });
+  if (!user) return filterValue ?? null;
   const userFiltersObj = userFilters ? JSON.parse(userFilters.filters) : {};
   if (filterValue === undefined && userFilters) {
     return userFiltersObj[filterName];
@@ -28,6 +26,7 @@ export const getFilter = async <TValue>(
       userFiltersObj[filterName] = filterValue;
     }
     const filters = JSON.stringify(userFiltersObj);
+    // console.log(!!userFilters);
     if (userFilters) {
       await userFilters.update({ filters });
     } else {
@@ -40,4 +39,23 @@ export const getFilter = async <TValue>(
     return filterValue;
   }
   return null;
+};
+
+export const getUserPropertyCondition = (userPropertyToFilter: USER_PROPERTY, table: string) => {
+  const hasCar = `$Users.${table}.hasCar$`;
+  const wantsCar = `$Users.${table}.wantsCar$`;
+  if (userPropertyToFilter === USER_PROPERTY.OWNED) {
+    return {
+      [Op.or]: [{ [hasCar]: 1 }],
+    };
+  } else if (userPropertyToFilter === USER_PROPERTY.WISHED) {
+    return {
+      [Op.or]: [{ [wantsCar]: 1 }],
+    };
+  } else if (userPropertyToFilter === USER_PROPERTY.NOT_OWNED) {
+    return {
+      [Op.or]: [{ [hasCar]: null }, { [wantsCar]: null }],
+    };
+  }
+  return { error: true };
 };

@@ -1,75 +1,55 @@
 import { Request, Response } from 'express';
 import { Sequelize, WhereOptions } from 'sequelize';
-import { USER_PROPERTY } from '../../../shared/models/cars.models';
 import { ERROR, getError } from '../../../shared/models/errors.models';
 import { ResponseDTO } from '../../../shared/models/response.models';
-import { getFilter } from '../../user-filters/functions/user-filters.functions';
+import { getFilter, getUserPropertyCondition } from '../../user-filters/functions/user-filters.functions';
+import { UserFilters } from '../../user-filters/models/user-filters.models';
 import { User } from '../../users/models/users.models';
-import { getSeriesFilters } from '../functions/filters';
+import { getSeriesFilters } from '../functions/get-series-filters';
 import { UserBasicCar } from '../models/basic-cars-relations.models';
-import {
-  BASIC_CARS_PAGE,
-  BASIC_DEFAULT_YEAR,
-} from '../models/basic-cars.constants';
-import {
-  BasicCar,
-  BasicCarPayload,
-  BasicCarResponse,
-} from '../models/basic-cars.models';
+import { BASIC_CARS_PAGE, BASIC_DEFAULT_YEAR } from '../models/basic-cars.constants';
+import { BasicCar, BasicCarPayload, BasicCarResponse } from '../models/basic-cars.models';
 
 export const getBasicCars = async (
   req: Request<{}, ResponseDTO<BasicCarResponse>, BasicCarPayload>,
   res: Response<ResponseDTO<BasicCarResponse>>
 ) => {
   try {
+    BasicCar.belongsToMany(User, { through: UserBasicCar });
+    User.belongsToMany(BasicCar, { through: UserBasicCar });
     const { year, mainSerie, exclusiveSerie, userProperty } = req.body;
     const { user } = req.session;
 
     //#region GET / SAVE FILTERS
-    let yearToFilter: number = BASIC_DEFAULT_YEAR;
-    let mainSerieToFilter: string | null = null;
-    let exclusiveSerieToFilter: string | null = null;
-    // ! Falta implementar el userPropertyFilter
-    let userPropertyToFilter: USER_PROPERTY | null = null;
-    if (user) {
-      yearToFilter =
-        (await getFilter(user, BASIC_CARS_PAGE, year, 'year')) ??
-        BASIC_DEFAULT_YEAR;
-      mainSerieToFilter = await getFilter(
-        user,
-        BASIC_CARS_PAGE,
-        mainSerie,
-        'mainSerie'
-      );
-      exclusiveSerieToFilter = await getFilter(
-        user,
-        BASIC_CARS_PAGE,
-        exclusiveSerie,
-        'exclusiveSerie'
-      );
-      userPropertyToFilter = await getFilter(
-        user,
-        BASIC_CARS_PAGE,
-        userProperty,
-        'userProperty'
-      );
-    }
+    const userFilters = user
+      ? await UserFilters.findOne({
+          where: {
+            user_id: user.id,
+            page: BASIC_CARS_PAGE,
+          },
+        })
+      : null;
+    const yearToFilter = (await getFilter(user, userFilters, BASIC_CARS_PAGE, year, 'year')) ?? BASIC_DEFAULT_YEAR;
+    const mainSerieToFilter = await getFilter(user, userFilters, BASIC_CARS_PAGE, mainSerie, 'mainSerie');
+    const exclusiveSerieToFilter = await getFilter(user, userFilters, BASIC_CARS_PAGE, exclusiveSerie, 'exclusiveSerie');
+    const userPropertyToFilter = await getFilter(user, userFilters, BASIC_CARS_PAGE, userProperty, 'userProperty');
     //#endregion GET / SAVE FILTERS
 
     //#region QUERY FILTERS
-    const where: WhereOptions = {
+    const filters: WhereOptions = {
       year: yearToFilter,
       ...getSeriesFilters(mainSerieToFilter, exclusiveSerieToFilter),
     };
+    const userPropertyFilters =
+      user && userPropertyToFilter ? getUserPropertyCondition(userPropertyToFilter, 'UserBasicCar') : null;
+    if (userPropertyFilters && userPropertyFilters.error) return getError(res, 400, ERROR.BAD_PAYLOAD, ['UserProperty']);
     //#endregion QUERY FILTERS
 
     //#region QUERIES
     let cars: BasicCar[] = [];
     if (user) {
-      BasicCar.belongsToMany(User, { through: UserBasicCar });
-      User.belongsToMany(BasicCar, { through: UserBasicCar });
       cars = await BasicCar.findAll({
-        where,
+        where: { ...filters, ...userPropertyFilters },
         include: [
           {
             model: User,
@@ -88,7 +68,7 @@ export const getBasicCars = async (
         },
       });
     } else {
-      cars = await BasicCar.findAll({ where });
+      cars = await BasicCar.findAll({ where: filters });
     }
     //#endregion QUERIES
 

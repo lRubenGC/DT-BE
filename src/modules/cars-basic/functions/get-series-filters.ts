@@ -1,9 +1,6 @@
 import { Op } from 'sequelize';
 
-export const getSeriesFilters = (
-  mainSerie: string | null,
-  exclusiveSerie: string | null
-) => {
+export const getSeriesFilters = (mainSerie: string | null, exclusiveSerie: string | null) => {
   const filters = [];
   if (mainSerie) {
     filters.push({

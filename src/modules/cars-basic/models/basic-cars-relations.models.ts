@@ -1,7 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
 import { SEQUELIZE } from '../../../server/server.constants';
-import { User } from '../../users/models/users.models';
-import { BasicCar } from './basic-cars.models';
 
 //#region SEQUELIZE
 export class UserBasicCar extends Model {
@@ -30,8 +28,4 @@ UserBasicCar.init(
     timestamps: false,
   }
 );
-
-// ! No funciona
-User.belongsToMany(BasicCar, { through: UserBasicCar });
-BasicCar.belongsToMany(User, { through: UserBasicCar });
 //#endregion SEQUELIZE
