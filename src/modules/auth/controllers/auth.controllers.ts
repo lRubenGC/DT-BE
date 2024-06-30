@@ -9,8 +9,8 @@ import {
   REFRESH_TOKEN,
   REFRESH_TOKEN_EXPIRATION,
 } from '../models/auth.constants';
+import { getToken } from '../models/auth.functions';
 import { LoginPayload, RegisterPayload } from '../models/auth.models';
-const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 
 export const login = async (
@@ -27,16 +27,8 @@ export const login = async (
     if (!validPassword) {
       return getError(res, 401, ERROR.BAD_LOGIN);
     }
-    const accessToken = jwt.sign(
-      { id: user.id, email: user.email, username: user.username },
-      process.env.SECRETORPRIVATEKEY,
-      { expiresIn: ACCESS_TOKEN_EXPIRATION }
-    );
-    const refreshToken = jwt.sign(
-      { id: user.id, email: user.email, username: user.username },
-      process.env.SECRETORPRIVATEKEY,
-      { expiresIn: REFRESH_TOKEN_EXPIRATION }
-    );
+    const accessToken = getToken(user, ACCESS_TOKEN_EXPIRATION);
+    const refreshToken = getToken(user, REFRESH_TOKEN_EXPIRATION);
     return res
       .cookie(ACCESS_TOKEN, accessToken, JWT_COOKIE_PROPS)
       .cookie(REFRESH_TOKEN, refreshToken, JWT_COOKIE_PROPS)
@@ -58,7 +50,12 @@ export const register = async (
       email,
       password: encryptedPassword,
     });
-    res.json({ ok: true, data: user });
+    const accessToken = getToken(user, ACCESS_TOKEN_EXPIRATION);
+    const refreshToken = getToken(user, REFRESH_TOKEN_EXPIRATION);
+    return res
+      .cookie(ACCESS_TOKEN, accessToken, JWT_COOKIE_PROPS)
+      .cookie(REFRESH_TOKEN, refreshToken, JWT_COOKIE_PROPS)
+      .json({ ok: true, data: user });
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }
