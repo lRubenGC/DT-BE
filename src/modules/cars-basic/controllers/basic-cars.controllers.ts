@@ -13,6 +13,7 @@ import { UserBasicCar } from '../models/basic-cars-relations.models';
 import { BASIC_CARS_PAGE, BASIC_DEFAULT_YEAR } from '../models/basic-cars.constants';
 import {
   BasicCar,
+  BasicCarDTO,
   BasicCarPayload,
   BasicCarResponse,
   BasicCarsGrouped,
@@ -120,11 +121,56 @@ export const getBasicCars = async (
 };
 
 export const getBasicCar = async (
-  req: Request<{}, ResponseDTO<BasicCar>, BasicCarPayload>,
-  res: Response<ResponseDTO<BasicCar>>
+  req: Request<{}, ResponseDTO<BasicCarDTO>, { id: number }>,
+  res: Response<ResponseDTO<BasicCarDTO>>
 ) => {
   try {
-    return res.json();
+    //#region READONLY
+    BasicCar.belongsToMany(User, { through: UserBasicCar });
+    User.belongsToMany(BasicCar, { through: UserBasicCar });
+    const { id } = req.body;
+    const { user } = req.session;
+    //#endregion READONLY
+
+    //#region QUERY
+    let car: BasicCar | null;
+    if (user) {
+      car = await BasicCar.findByPk(id, {
+        include: [
+          {
+            model: User,
+            through: {
+              attributes: ['hasCar', 'wantsCar'],
+              where: { UserId: user.id },
+            },
+            attributes: [],
+          },
+        ],
+        attributes: {
+          include: [
+            [Sequelize.col('Users.UserBasicCar.hasCar'), 'hasCar'],
+            [Sequelize.col('Users.UserBasicCar.wantsCar'), 'wantsCar'],
+          ],
+        },
+      });
+    } else {
+      car = await BasicCar.findByPk(id);
+    }
+    //#endregion QUERY
+
+    //#region POST VALIDATIONS
+    if (!car) return getError(res, 400, ERROR.CAR_NOT_FOUND);
+    car = car.toJSON()!;
+    //#endregion POST VALIDATIONS
+
+    //#region CAR MAP
+    const carDTO = { ...car, series: car.series.split(',') };
+    //#endregion CAR MAP
+
+    return res.json({
+      ok: true,
+      data: { ...carDTO },
+    });
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }

@@ -10,6 +10,7 @@ export enum ERROR {
   EMAIL_BAD_PATTERN = 6,
   PASSWORD_BAD_PATTERN = 7,
   BAD_LOGIN = 8,
+  CAR_NOT_FOUND = 9,
 }
 
 export const ERROR_MESSAGE = {
@@ -21,6 +22,7 @@ export const ERROR_MESSAGE = {
   [ERROR.EMAIL_BAD_PATTERN]: 'Not a valid email pattern',
   [ERROR.PASSWORD_BAD_PATTERN]: 'Not a valid password pattern',
   [ERROR.BAD_LOGIN]: 'Not valid credentials',
+  [ERROR.CAR_NOT_FOUND]: 'Car not found',
 };
 
 export const getError = (
