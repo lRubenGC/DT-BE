@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Sequelize, WhereOptions } from 'sequelize';
 import { USER_PROPERTY } from '../../../shared/models/cars.models';
 import { ERROR, getError } from '../../../shared/models/errors.models';
-import { ResponseDTO, getResponse } from '../../../shared/models/response.models';
+import { ResponseDTO } from '../../../shared/models/response.models';
 import {
   getFilters,
   getUserPropertyCondition,
@@ -11,7 +11,12 @@ import { User } from '../../users/models/users.models';
 import { getSeriesFilters } from '../functions/get-series-filters';
 import { UserBasicCar } from '../models/basic-cars-relations.models';
 import { BASIC_CARS_PAGE, BASIC_DEFAULT_YEAR } from '../models/basic-cars.constants';
-import { BasicCar, BasicCarPayload, BasicCarResponse } from '../models/basic-cars.models';
+import {
+  BasicCar,
+  BasicCarPayload,
+  BasicCarResponse,
+  BasicCarsGrouped,
+} from '../models/basic-cars.models';
 
 export const getBasicCars = async (
   req: Request<{}, ResponseDTO<BasicCarResponse>, BasicCarPayload>,
@@ -85,13 +90,28 @@ export const getBasicCars = async (
     }
     //#endregion FINAL QUERY
 
-    return getResponse(res, {
-      cars,
-      filters: {
-        year: yearToFilter ?? BASIC_DEFAULT_YEAR,
-        mainSerie: mainSerieToFilter,
-        exclusiveSerie: exclusiveSerieToFilter,
-        userProperty: user ? userPropertyToFilter : null,
+    //#region CARS MAP
+    const groupedCars = cars.reduce<BasicCarsGrouped>((acc, item) => {
+      const car = item.toJSON();
+      const key = car.series.split(',')[0];
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push({ ...car, series: car.series.split(',') });
+      return acc;
+    }, {});
+    //#endregion CARS MAP
+
+    return res.json({
+      ok: true,
+      data: {
+        groupedCars,
+        filters: {
+          year: yearToFilter ?? BASIC_DEFAULT_YEAR,
+          mainSerie: mainSerieToFilter,
+          exclusiveSerie: exclusiveSerieToFilter,
+          userProperty: user ? userPropertyToFilter : null,
+        },
       },
     });
   } catch (error) {

@@ -74,7 +74,7 @@ BasicCar.init(
 //#endregion SEQUELIZE
 
 export interface BasicCarResponse {
-  cars: BasicCar[];
+  groupedCars: BasicCarsGrouped;
   filters: BasicCarPayload | null;
 }
 
@@ -84,3 +84,21 @@ export interface BasicCarPayload {
   exclusiveSerie?: string | null;
   userProperty?: USER_PROPERTY | null;
 }
+
+export interface BasicCarDTO {
+  id: number;
+  car_id: string;
+  col: number;
+  model_name: string;
+  version: string;
+  series: string[];
+  exclusive_serie: string | null;
+  col_serie: string;
+  year: number;
+  brand: string;
+  img: string;
+  hasCar: number;
+  wantsCar: number;
+}
+
+export type BasicCarsGrouped = { [key: string]: BasicCarDTO[] };
