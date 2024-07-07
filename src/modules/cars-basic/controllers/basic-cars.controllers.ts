@@ -108,8 +108,8 @@ export const getBasicCars = async (
     return res.json({
       ok: true,
       data: {
-        groupedCars,
-        filtersSelected: {
+        cars: groupedCars,
+        filters: {
           year: yearToFilter ?? BASIC_DEFAULT_YEAR,
           mainSerie: mainSerieToFilter,
           exclusiveSerie: exclusiveSerieToFilter,

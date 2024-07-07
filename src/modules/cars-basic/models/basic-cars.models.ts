@@ -74,8 +74,8 @@ BasicCar.init(
 //#endregion SEQUELIZE
 
 export interface BasicCarResponse {
-  groupedCars: BasicCarsGrouped;
-  filtersSelected: BasicCarPayload | null;
+  cars: BasicCarsGrouped;
+  filters: BasicCarPayload | null;
   carsShowed: number;
   carsOwned: number;
 }
