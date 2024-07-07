@@ -92,8 +92,10 @@ export const getBasicCars = async (
     //#endregion FINAL QUERY
 
     //#region CARS MAP
+    let carsOwned = 0;
     const groupedCars = cars.reduce<BasicCarsGrouped>((acc, item) => {
       const car = item.toJSON();
+      if (car.hasCar) carsOwned++;
       const key = car.series.split(',')[0];
       if (!acc[key]) {
         acc[key] = [];
@@ -107,12 +109,14 @@ export const getBasicCars = async (
       ok: true,
       data: {
         groupedCars,
-        filters: {
+        filtersSelected: {
           year: yearToFilter ?? BASIC_DEFAULT_YEAR,
           mainSerie: mainSerieToFilter,
           exclusiveSerie: exclusiveSerieToFilter,
           userProperty: user ? userPropertyToFilter : null,
         },
+        carsShowed: cars.length,
+        carsOwned,
       },
     });
   } catch (error) {

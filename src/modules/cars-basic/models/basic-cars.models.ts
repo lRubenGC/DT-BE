@@ -75,7 +75,9 @@ BasicCar.init(
 
 export interface BasicCarResponse {
   groupedCars: BasicCarsGrouped;
-  filters: BasicCarPayload | null;
+  filtersSelected: BasicCarPayload | null;
+  carsShowed: number;
+  carsOwned: number;
 }
 
 export interface BasicCarPayload {
