@@ -1,8 +1,13 @@
 import { Request, Response } from 'express';
 import { Sequelize, WhereOptions } from 'sequelize';
-import { USER_PROPERTY } from '../../../shared/models/cars.models';
+import {
+  AVAILABLE_USER_PROPERTY_FILTERS,
+  USER_PROPERTY,
+} from '../../../shared/models/cars.models';
 import { ERROR, getError } from '../../../shared/models/errors.models';
 import { ResponseDTO } from '../../../shared/models/response.models';
+import { getBasicCarsFiltersSeries } from '../../available-series/functions/available-series.functions';
+import { AvailableSeries } from '../../available-series/models/available-series.models';
 import {
   getFilters,
   getUserPropertyCondition,
@@ -10,10 +15,15 @@ import {
 import { User } from '../../users/models/users.models';
 import { getSeriesFilters } from '../functions/get-series-filters';
 import { UserBasicCar } from '../models/basic-cars-relations.models';
-import { BASIC_CARS_PAGE, BASIC_DEFAULT_YEAR } from '../models/basic-cars.constants';
+import {
+  BASIC_CARS_PAGE,
+  BASIC_CARS_YEARS_AVAILABLE,
+  BASIC_DEFAULT_YEAR,
+} from '../models/basic-cars.constants';
 import {
   BasicCar,
   BasicCarDTO,
+  BasicCarFiltersResponse,
   BasicCarPayload,
   BasicCarResponse,
   BasicCarsGrouped,
@@ -167,4 +177,20 @@ export const getBasicCar = async (
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }
+};
+
+export const getBasicCarFilters = async (
+  req: Request<{}, ResponseDTO<BasicCarFiltersResponse>, { year: number }>,
+  res: Response<ResponseDTO<BasicCarFiltersResponse>>
+) => {
+  return res.json({
+    ok: true,
+    data: {
+      year: BASIC_CARS_YEARS_AVAILABLE,
+      ...getBasicCarsFiltersSeries(
+        await AvailableSeries.findOne({ where: { main: req.body.year } })
+      ),
+      userProperty: AVAILABLE_USER_PROPERTY_FILTERS,
+    },
+  });
 };

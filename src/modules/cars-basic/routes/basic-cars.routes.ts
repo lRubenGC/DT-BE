@@ -3,7 +3,11 @@ import { check } from 'express-validator';
 import { isNumber } from '../../../shared/middlewares/shared-validations';
 import { isValidYear } from '../../../shared/middlewares/validate-basic-cars';
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
-import { getBasicCar, getBasicCars } from '../controllers/basic-cars.controllers';
+import {
+  getBasicCar,
+  getBasicCarFilters,
+  getBasicCars,
+} from '../controllers/basic-cars.controllers';
 
 export const basicCarsRouter = Router();
 export const BASIC_CARS_ROUTE = '/api/basic-cars';
@@ -17,4 +21,9 @@ basicCarsRouter.post(
   '/get-single',
   [check('id').custom(isNumber), validateErrors],
   getBasicCar
+);
+basicCarsRouter.post(
+  '/get-filters',
+  [check('year').custom(isValidYear), validateErrors],
+  getBasicCarFilters
 );

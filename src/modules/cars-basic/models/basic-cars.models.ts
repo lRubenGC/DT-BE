@@ -104,3 +104,10 @@ export interface BasicCarDTO {
 }
 
 export type BasicCarsGrouped = { [key: string]: BasicCarDTO[] };
+
+export interface BasicCarFiltersResponse {
+  year: number[];
+  mainSerie: string[];
+  exclusiveSerie: string[];
+  userProperty: USER_PROPERTY[];
+}
