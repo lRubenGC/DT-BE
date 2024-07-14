@@ -73,18 +73,18 @@ BasicCar.init(
 );
 //#endregion SEQUELIZE
 
-export interface BasicCarResponse {
-  cars: BasicCarsGrouped;
-  filters: BasicCarPayload | null;
-  carsShowed: number;
-  carsOwned: number;
-}
-
 export interface BasicCarPayload {
   year: number;
   mainSerie?: string | null;
   exclusiveSerie?: string | null;
   userProperty?: USER_PROPERTY | null;
+}
+
+export interface BasicCarResponse {
+  cars: BasicCarsGrouped;
+  filters: BasicCarPayload | null;
+  carsShowed: number;
+  carsOwned: number;
 }
 
 export interface BasicCarDTO {
