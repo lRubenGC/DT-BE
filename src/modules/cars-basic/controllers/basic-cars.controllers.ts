@@ -65,30 +65,27 @@ export const getBasicCars = async (
     //#endregion FILTERS QUERIES
 
     //#region FINAL QUERY
-    let cars: BasicCar[];
-    if (user) {
-      cars = await BasicCar.findAll({
-        where: { ...coreFilters, ...userPropertyFilter },
-        include: [
-          {
-            model: User,
-            through: {
-              attributes: ['hasCar', 'wantsCar'],
-              where: { UserId: user.id },
-            },
-            attributes: [],
-          },
-        ],
-        attributes: {
+    const cars: BasicCar[] = user
+      ? await BasicCar.findAll({
+          where: { ...coreFilters, ...userPropertyFilter },
           include: [
-            [Sequelize.col('Users.UserBasicCar.hasCar'), 'hasCar'],
-            [Sequelize.col('Users.UserBasicCar.wantsCar'), 'wantsCar'],
+            {
+              model: User,
+              through: {
+                attributes: ['hasCar', 'wantsCar'],
+                where: { UserId: user.id },
+              },
+              attributes: [],
+            },
           ],
-        },
-      });
-    } else {
-      cars = await BasicCar.findAll({ where: coreFilters });
-    }
+          attributes: {
+            include: [
+              [Sequelize.col('Users.UserBasicCar.hasCar'), 'hasCar'],
+              [Sequelize.col('Users.UserBasicCar.wantsCar'), 'wantsCar'],
+            ],
+          },
+        })
+      : await BasicCar.findAll({ where: coreFilters });
     //#endregion FINAL QUERY
 
     //#region CARS MAP
@@ -137,43 +134,35 @@ export const getBasicCar = async (
     //#endregion READONLY
 
     //#region QUERY
-    let car: BasicCar | null;
-    if (user) {
-      car = await BasicCar.findByPk(id, {
-        include: [
-          {
-            model: User,
-            through: {
-              attributes: ['hasCar', 'wantsCar'],
-              where: { UserId: user.id },
-            },
-            attributes: [],
-          },
-        ],
-        attributes: {
+    const car: BasicCar | null = user
+      ? await BasicCar.findByPk(id, {
           include: [
-            [Sequelize.col('Users.UserBasicCar.hasCar'), 'hasCar'],
-            [Sequelize.col('Users.UserBasicCar.wantsCar'), 'wantsCar'],
+            {
+              model: User,
+              through: {
+                attributes: ['hasCar', 'wantsCar'],
+                where: { UserId: user.id },
+              },
+              attributes: [],
+            },
           ],
-        },
-      });
-    } else {
-      car = await BasicCar.findByPk(id);
-    }
+          attributes: {
+            include: [
+              [Sequelize.col('Users.UserBasicCar.hasCar'), 'hasCar'],
+              [Sequelize.col('Users.UserBasicCar.wantsCar'), 'wantsCar'],
+            ],
+          },
+        })
+      : await BasicCar.findByPk(id);
     //#endregion QUERY
 
     //#region POST VALIDATIONS
     if (!car) return getError(res, 400, ERROR.CAR_NOT_FOUND);
-    car = car.toJSON()!;
     //#endregion POST VALIDATIONS
-
-    //#region CAR MAP
-    const carDTO = { ...car, series: car.series.split(',') };
-    //#endregion CAR MAP
 
     return res.json({
       ok: true,
-      data: { ...carDTO },
+      data: { ...car.toJSON(), series: car.toJSON().series.split(',') },
     });
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
