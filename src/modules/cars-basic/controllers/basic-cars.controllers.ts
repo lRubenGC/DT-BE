@@ -94,6 +94,7 @@ export const getBasicCars = async (
               [Sequelize.col('Users.UserBasicCar.wantsCar'), 'wantsCar'],
             ],
           },
+          order: [['col_serie', 'ASC']],
         })
       : await BasicCar.findAll({ where: coreFilters });
     //#endregion FINAL QUERY
