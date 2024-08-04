@@ -13,7 +13,7 @@ import {
   getUserPropertyCondition,
 } from '../../user-filters/functions/user-filters.functions';
 import { User } from '../../users/models/users.models';
-import { getSeriesFilters } from '../functions/get-series-filters';
+import { getBasicSeriesFilters } from '../functions/get-basic-series-filters';
 import { UserBasicCar } from '../models/basic-cars-relations.models';
 import {
   BASIC_CARS_PAGE,
@@ -63,7 +63,7 @@ export const getBasicCars = async (
     //#region FILTERS QUERIES
     const coreFilters: WhereOptions = {
       year: yearToFilter ?? BASIC_DEFAULT_YEAR,
-      ...getSeriesFilters(mainSerieToFilter, exclusiveSerieToFilter),
+      ...getBasicSeriesFilters(mainSerieToFilter, exclusiveSerieToFilter),
     };
     const userPropertyFilter =
       user && userPropertyToFilter

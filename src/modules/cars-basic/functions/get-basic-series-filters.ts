@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 
-export const getSeriesFilters = (
+export const getBasicSeriesFilters = (
   mainSerie: string | null,
   exclusiveSerie: string | null
 ) => {
