@@ -11,6 +11,10 @@ import {
   BASIC_CARS_ROUTE,
   basicCarsRouter,
 } from '../modules/cars-basic/routes/basic-cars.routes';
+import {
+  PREMIUM_CARS_ROUTE,
+  premiumCarsRouter,
+} from '../modules/cars-premium/routes/premium-cars.routes';
 import { SEQUELIZE } from './server.constants';
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -85,6 +89,7 @@ export class Server {
   private routes() {
     this.app.use(AUTH_ROUTE, authRouter);
     this.app.use(BASIC_CARS_ROUTE, basicCarsRouter);
+    this.app.use(PREMIUM_CARS_ROUTE, premiumCarsRouter);
   }
 
   public listen() {

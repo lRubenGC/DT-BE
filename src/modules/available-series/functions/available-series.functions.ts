@@ -11,3 +11,11 @@ export const getBasicCarsFiltersSeries = (
         : [],
   };
 };
+
+export const getPremiumCarsFiltersSeries = (
+  availableSeries: AvailableSeries | null
+): { secondarySerie: string[] } => {
+  return {
+    secondarySerie: availableSeries?.series ? availableSeries.series.split(',') : [],
+  };
+};
