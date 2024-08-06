@@ -3,7 +3,7 @@ import { SEQUELIZE } from '../../../server/server.constants';
 
 //#region SEQUELIZE
 export class UserPremiumCar extends Model {
-  public id!: number;
+  public id?: number;
   public UserId!: number;
   public PremiumCarId!: number;
   public hasCar!: number;

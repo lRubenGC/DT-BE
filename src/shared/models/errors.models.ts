@@ -11,9 +11,11 @@ export enum ERROR {
   PASSWORD_BAD_PATTERN = 7,
   BAD_LOGIN = 8,
   CAR_NOT_FOUND = 9,
+  USER_NOT_LOGGED_IN = 10,
+  USER_ALREADY_HAS_CAR = 11,
 }
 
-export const ERROR_MESSAGE = {
+export const ERROR_MESSAGE: { [key in ERROR]: string } = {
   [ERROR.SERVER_ERROR]: 'Internal server error',
   [ERROR.BAD_PAYLOAD]: 'Bad payload',
   [ERROR.USERNAME_DUPLICATED]: 'Duplicated username',
@@ -23,6 +25,8 @@ export const ERROR_MESSAGE = {
   [ERROR.PASSWORD_BAD_PATTERN]: 'Not a valid password pattern',
   [ERROR.BAD_LOGIN]: 'Not valid credentials',
   [ERROR.CAR_NOT_FOUND]: 'Car not found',
+  [ERROR.USER_NOT_LOGGED_IN]: 'User not logged in',
+  [ERROR.USER_ALREADY_HAS_CAR]: 'Car has already been added to user',
 };
 
 export const getError = (
