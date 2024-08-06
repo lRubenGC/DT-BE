@@ -102,13 +102,13 @@ export const getBasicCars = async (
     //#region CARS MAP
     let carsOwned = 0;
     const groupedCars = cars.reduce<BasicCarsGrouped>((acc, item) => {
-      const car = item.toJSON();
+      const car: BasicCar = item.toJSON();
       if (car.hasCar) carsOwned++;
       const key = car.series.split(',')[0];
       if (!acc[key]) {
         acc[key] = [];
       }
-      acc[key].push({ ...car, series: car.series.split(',') });
+      acc[key].push({ ...car, series: car.series.split(',') } as BasicCarDTO);
       return acc;
     }, {});
     //#endregion CARS MAP

@@ -97,12 +97,12 @@ export const getPremiumCars = async (
     //#region CARS MAP
     let carsOwned = 0;
     const groupedCars = cars.reduce<PremiumCarsGrouped>((acc, item) => {
-      const car = item.toJSON();
+      const car: PremiumCar = item.toJSON();
       if (car.hasCar) carsOwned++;
-      if (!acc[car.series]) {
-        acc[car.series] = [];
+      if (!acc[car.secondary_serie]) {
+        acc[car.secondary_serie] = [];
       }
-      acc[car.series].push(car);
+      acc[car.secondary_serie].push(car);
       return acc;
     }, {});
     //#endregion CARS MAP

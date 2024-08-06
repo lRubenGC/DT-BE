@@ -60,7 +60,7 @@ export interface PremiumCarDTO {
   secondary_serie: string;
   col_serie: string | null;
   year: number;
-  brand: string;
+  brand: string | null;
   img: string;
   card_img: string;
   hasCar: number | null;
