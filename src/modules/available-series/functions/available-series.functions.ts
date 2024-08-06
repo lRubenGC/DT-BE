@@ -19,3 +19,11 @@ export const getPremiumCarsFiltersSeries = (
     secondarySerie: availableSeries?.series ? availableSeries.series.split(',') : [],
   };
 };
+
+export const getSpecialCarsFiltersSeries = (
+  availableSeries: AvailableSeries | null
+): { secondarySerie: string[] } => {
+  return {
+    secondarySerie: availableSeries?.series ? availableSeries.series.split(',') : [],
+  };
+};
