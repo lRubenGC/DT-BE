@@ -214,6 +214,8 @@ export const addPremiumCar = async (
     if ((!hasCar && !wantsCar) || (hasCar && wantsCar)) {
       return getError(res, 400, ERROR.BAD_PAYLOAD);
     }
+    const car = await PremiumCar.findByPk(carId);
+    if (!car) return getError(res, 400, ERROR.CAR_NOT_FOUND);
     //#endregion VALIDATIONS
 
     //#region UPDATE IF EXISTS
