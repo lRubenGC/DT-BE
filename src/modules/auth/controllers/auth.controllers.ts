@@ -14,7 +14,7 @@ import { LoginPayload, RegisterPayload } from '../models/auth.models';
 const bcryptjs = require('bcryptjs');
 
 export const login = async (
-  req: Request<{}, ResponseDTO<User>, LoginPayload>,
+  req: Request<{}, {}, LoginPayload>,
   res: Response<ResponseDTO<User>>
 ) => {
   try {
@@ -39,7 +39,7 @@ export const login = async (
 };
 
 export const register = async (
-  req: Request<{}, ResponseDTO<User>, RegisterPayload>,
+  req: Request<{}, {}, RegisterPayload>,
   res: Response<ResponseDTO<User>>
 ) => {
   try {

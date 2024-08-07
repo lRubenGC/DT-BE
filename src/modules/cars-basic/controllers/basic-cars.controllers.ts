@@ -30,7 +30,7 @@ import {
 } from '../models/basic-cars.models';
 
 export const getBasicCars = async (
-  req: Request<{}, ResponseDTO<BasicCarResponse>, BasicCarPayload>,
+  req: Request<{}, {}, BasicCarPayload>,
   res: Response<ResponseDTO<BasicCarResponse>>
 ) => {
   try {
@@ -133,7 +133,7 @@ export const getBasicCars = async (
 };
 
 export const getBasicCar = async (
-  req: Request<{}, ResponseDTO<BasicCarDTO>, { id: number }>,
+  req: Request<{}, {}, { id: number }>,
   res: Response<ResponseDTO<BasicCarDTO>>
 ) => {
   try {
@@ -181,7 +181,7 @@ export const getBasicCar = async (
 };
 
 export const getBasicCarFilters = async (
-  req: Request<{}, ResponseDTO<BasicCarFiltersResponse>, { year: number }>,
+  req: Request<{}, {}, { year: number }>,
   res: Response<ResponseDTO<BasicCarFiltersResponse>>
 ) => {
   return res.json({
@@ -199,7 +199,7 @@ export const getBasicCarFilters = async (
 export const addBasicCar = async (
   req: Request<
     {},
-    ResponseDTO,
+    {},
     {
       carId: number;
       hasCar: boolean | null;
@@ -261,7 +261,7 @@ export const addBasicCar = async (
 };
 
 export const deleteBasicCar = async (
-  req: Request<{}, ResponseDTO, { carId: number }>,
+  req: Request<{}, {}, { carId: number }>,
   res: Response<ResponseDTO>
 ) => {
   try {
@@ -293,7 +293,7 @@ export const deleteBasicCar = async (
 };
 
 export const getSimilarBasicCars = async (
-  req: Request<{}, ResponseDTO<BasicCar[]>, { model_name: number }>,
+  req: Request<{}, {}, { model_name: number }>,
   res: Response<ResponseDTO<BasicCar[]>>
 ) => {
   //#region READONLY

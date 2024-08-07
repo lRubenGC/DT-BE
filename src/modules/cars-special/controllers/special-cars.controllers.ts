@@ -30,7 +30,7 @@ import {
 } from '../models/special-cars.models';
 
 export const getSpecialCars = async (
-  req: Request<{}, ResponseDTO<SpecialCarResponse>, SpecialCarPayload>,
+  req: Request<{}, {}, SpecialCarPayload>,
   res: Response<ResponseDTO<SpecialCarResponse>>
 ) => {
   try {
@@ -126,7 +126,7 @@ export const getSpecialCars = async (
 };
 
 export const getSpecialCar = async (
-  req: Request<{}, ResponseDTO<SpecialCarDTO>, { id: number }>,
+  req: Request<{}, {}, { id: number }>,
   res: Response<ResponseDTO<SpecialCarDTO>>
 ) => {
   try {
@@ -174,7 +174,7 @@ export const getSpecialCar = async (
 };
 
 export const getSpecialCarFilters = async (
-  req: Request<{}, ResponseDTO<SpecialCarFiltersResponse>, { mainSerie: string }>,
+  req: Request<{}, {}, { mainSerie: string }>,
   res: Response<ResponseDTO<SpecialCarFiltersResponse>>
 ) => {
   return res.json({
@@ -192,7 +192,7 @@ export const getSpecialCarFilters = async (
 export const addSpecialCar = async (
   req: Request<
     {},
-    ResponseDTO,
+    {},
     {
       carId: number;
       hasCar: boolean | null;
@@ -254,7 +254,7 @@ export const addSpecialCar = async (
 };
 
 export const deleteSpecialCar = async (
-  req: Request<{}, ResponseDTO, { carId: number }>,
+  req: Request<{}, {}, { carId: number }>,
   res: Response<ResponseDTO>
 ) => {
   try {
@@ -286,7 +286,7 @@ export const deleteSpecialCar = async (
 };
 
 export const getSimilarSpecialCars = async (
-  req: Request<{}, ResponseDTO<SpecialCar[]>, { model_name: number }>,
+  req: Request<{}, {}, { model_name: number }>,
   res: Response<ResponseDTO<SpecialCar[]>>
 ) => {
   //#region READONLY

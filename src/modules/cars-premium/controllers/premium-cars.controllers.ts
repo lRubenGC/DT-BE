@@ -30,7 +30,7 @@ import {
 } from '../models/premium-cars.models';
 
 export const getPremiumCars = async (
-  req: Request<{}, ResponseDTO<PremiumCarResponse>, PremiumCarPayload>,
+  req: Request<{}, {}, PremiumCarPayload>,
   res: Response<ResponseDTO<PremiumCarResponse>>
 ) => {
   try {
@@ -126,7 +126,7 @@ export const getPremiumCars = async (
 };
 
 export const getPremiumCar = async (
-  req: Request<{}, ResponseDTO<PremiumCarDTO>, { id: number }>,
+  req: Request<{}, {}, { id: number }>,
   res: Response<ResponseDTO<PremiumCarDTO>>
 ) => {
   try {
@@ -174,7 +174,7 @@ export const getPremiumCar = async (
 };
 
 export const getPremiumCarFilters = async (
-  req: Request<{}, ResponseDTO<PremiumCarFiltersResponse>, { mainSerie: string }>,
+  req: Request<{}, {}, { mainSerie: string }>,
   res: Response<ResponseDTO<PremiumCarFiltersResponse>>
 ) => {
   return res.json({
@@ -192,7 +192,7 @@ export const getPremiumCarFilters = async (
 export const addPremiumCar = async (
   req: Request<
     {},
-    ResponseDTO,
+    {},
     {
       carId: number;
       hasCar: boolean | null;
@@ -254,7 +254,7 @@ export const addPremiumCar = async (
 };
 
 export const deletePremiumCar = async (
-  req: Request<{}, ResponseDTO, { carId: number }>,
+  req: Request<{}, {}, { carId: number }>,
   res: Response<ResponseDTO>
 ) => {
   try {
@@ -286,7 +286,7 @@ export const deletePremiumCar = async (
 };
 
 export const getSimilarPremiumCars = async (
-  req: Request<{}, ResponseDTO<PremiumCar[]>, { model_name: number }>,
+  req: Request<{}, {}, { model_name: number }>,
   res: Response<ResponseDTO<PremiumCar[]>>
 ) => {
   //#region READONLY
