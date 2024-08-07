@@ -4,6 +4,8 @@ import { isNumber } from '../../../shared/middlewares/shared-validations';
 import { isValidYear } from '../../../shared/middlewares/validate-basic-cars';
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
 import {
+  addBasicCar,
+  deleteBasicCar,
   getBasicCar,
   getBasicCarFilters,
   getBasicCars,
@@ -26,4 +28,14 @@ basicCarsRouter.post(
   '/get-filters',
   [check('year').custom(isValidYear), validateErrors],
   getBasicCarFilters
+);
+basicCarsRouter.post(
+  '/add-car',
+  [check('carId').custom(isNumber), validateErrors],
+  addBasicCar
+);
+basicCarsRouter.post(
+  '/delete-car',
+  [check('carId').custom(isNumber), validateErrors],
+  deleteBasicCar
 );
