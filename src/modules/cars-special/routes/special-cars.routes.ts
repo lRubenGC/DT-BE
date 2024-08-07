@@ -5,6 +5,7 @@ import { validateErrors } from '../../../shared/middlewares/validate-errors';
 import {
   addSpecialCar,
   deleteSpecialCar,
+  getSimilarSpecialCars,
   getSpecialCar,
   getSpecialCarFilters,
   getSpecialCars,
@@ -37,4 +38,9 @@ specialCarsRouter.post(
   '/delete-car',
   [check('carId').custom(isNumber), validateErrors],
   deleteSpecialCar
+);
+specialCarsRouter.post(
+  '/get-similar-cars',
+  [check('model_name').custom(isString), validateErrors],
+  getSimilarSpecialCars
 );

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Sequelize, WhereOptions } from 'sequelize';
+import { Op, Sequelize, WhereOptions } from 'sequelize';
 import {
   AVAILABLE_USER_PROPERTY_FILTERS,
   USER_PROPERTY,
@@ -283,4 +283,60 @@ export const deleteSpecialCar = async (
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }
+};
+
+export const getSimilarSpecialCars = async (
+  req: Request<{}, ResponseDTO<SpecialCar[]>, { model_name: number }>,
+  res: Response<ResponseDTO<SpecialCar[]>>
+) => {
+  //#region READONLY
+  const { model_name } = req.body;
+  const { user } = req.session;
+  User.belongsToMany(SpecialCar, { through: UserSpecialCar });
+  SpecialCar.belongsToMany(User, { through: UserSpecialCar });
+  //#endregion READONLY
+
+  //#region FINAL QUERY
+  const cars = user
+    ? await SpecialCar.findAll({
+        where: {
+          id: {
+            [Op.in]: Sequelize.literal(`(
+              SELECT id FROM (
+                SELECT id FROM special_cars
+                WHERE model_name LIKE '%${model_name}%'
+                ORDER BY year DESC
+                LIMIT 100
+              ) AS limited_cars
+            )`),
+          },
+        },
+        include: [
+          {
+            model: User,
+            through: {
+              attributes: ['hasCar', 'wantsCar'],
+              where: { UserId: user.id },
+            },
+            attributes: [],
+          },
+        ],
+        attributes: {
+          include: [
+            [Sequelize.col('Users.UserSpecialCar.hasCar'), 'hasCar'],
+            [Sequelize.col('Users.UserSpecialCar.wantsCar'), 'wantsCar'],
+          ],
+        },
+      })
+    : await SpecialCar.findAll({
+        where: { model_name: { [Op.like]: `%${model_name}%` } },
+        limit: 100,
+        order: [['year', 'DESC']],
+      });
+  //#endregion FINAL QUERY
+
+  return res.json({
+    ok: true,
+    data: cars,
+  });
 };
