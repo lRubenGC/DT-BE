@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { isNumber } from '../../../shared/middlewares/shared-validations';
+import { isNumber, isString } from '../../../shared/middlewares/shared-validations';
 import { isValidYear } from '../../../shared/middlewares/validate-basic-cars';
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
 import {
@@ -9,6 +9,7 @@ import {
   getBasicCar,
   getBasicCarFilters,
   getBasicCars,
+  getSimilarBasicCars,
 } from '../controllers/basic-cars.controllers';
 
 export const basicCarsRouter = Router();
@@ -38,4 +39,9 @@ basicCarsRouter.post(
   '/delete-car',
   [check('carId').custom(isNumber), validateErrors],
   deleteBasicCar
+);
+basicCarsRouter.post(
+  '/get-similar-cars',
+  [check('model_name').custom(isString), validateErrors],
+  getSimilarBasicCars
 );
