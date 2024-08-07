@@ -4,10 +4,11 @@ import { isNumber, isString } from '../../../shared/middlewares/shared-validatio
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
 import {
   addPremiumCar,
+  deletePremiumCar,
   getPremiumCar,
   getPremiumCarFilters,
   getPremiumCars,
-  deletePremiumCar,
+  getSimilarPremiumCars,
 } from '../controllers/premium-cars.controllers';
 
 export const premiumCarsRouter = Router();
@@ -37,4 +38,9 @@ premiumCarsRouter.post(
   '/delete-car',
   [check('carId').custom(isNumber), validateErrors],
   deletePremiumCar
+);
+premiumCarsRouter.post(
+  '/get-similar-cars',
+  [check('model_name').custom(isString), validateErrors],
+  getSimilarPremiumCars
 );

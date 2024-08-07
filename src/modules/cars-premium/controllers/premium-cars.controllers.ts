@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Sequelize, WhereOptions } from 'sequelize';
+import { Op, Sequelize, WhereOptions } from 'sequelize';
 import {
   AVAILABLE_USER_PROPERTY_FILTERS,
   USER_PROPERTY,
@@ -283,4 +283,60 @@ export const deletePremiumCar = async (
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }
+};
+
+export const getSimilarPremiumCars = async (
+  req: Request<{}, ResponseDTO<PremiumCar[]>, { model_name: number }>,
+  res: Response<ResponseDTO<PremiumCar[]>>
+) => {
+  //#region READONLY
+  const { model_name } = req.body;
+  const { user } = req.session;
+  User.belongsToMany(PremiumCar, { through: UserPremiumCar });
+  PremiumCar.belongsToMany(User, { through: UserPremiumCar });
+  //#endregion READONLY
+
+  //#region FINAL QUERY
+  const cars = user
+    ? await PremiumCar.findAll({
+        where: {
+          id: {
+            [Op.in]: Sequelize.literal(`(
+              SELECT id FROM (
+                SELECT id FROM premium_cars
+                WHERE model_name LIKE '%${model_name}%'
+                ORDER BY year DESC
+                LIMIT 100
+              ) AS limited_cars
+            )`),
+          },
+        },
+        include: [
+          {
+            model: User,
+            through: {
+              attributes: ['hasCar', 'wantsCar'],
+              where: { UserId: user.id },
+            },
+            attributes: [],
+          },
+        ],
+        attributes: {
+          include: [
+            [Sequelize.col('Users.UserPremiumCar.hasCar'), 'hasCar'],
+            [Sequelize.col('Users.UserPremiumCar.wantsCar'), 'wantsCar'],
+          ],
+        },
+      })
+    : await PremiumCar.findAll({
+        where: { model_name: { [Op.like]: `%${model_name}%` } },
+        limit: 100,
+        order: [['year', 'DESC']],
+      });
+  //#endregion FINAL QUERY
+
+  return res.json({
+    ok: true,
+    data: cars,
+  });
 };
