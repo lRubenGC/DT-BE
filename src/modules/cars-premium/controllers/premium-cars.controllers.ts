@@ -277,7 +277,7 @@ export const deletePremiumCar = async (
       ok: true,
       data: null,
     });
-    //#enfregion DELETION
+    //#endregion DELETION
   } catch (error) {
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }

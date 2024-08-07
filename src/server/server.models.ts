@@ -6,6 +6,7 @@ import {
   JWT_COOKIE_PROPS,
   REFRESH_TOKEN,
 } from '../modules/auth/models/auth.constants';
+import { getToken } from '../modules/auth/models/auth.functions';
 import { AUTH_ROUTE, authRouter } from '../modules/auth/routes/auth.routes';
 import {
   BASIC_CARS_ROUTE,
@@ -78,11 +79,7 @@ export class Server {
     } catch (err) {
       try {
         const user = jwt.verify(refreshToken, process.env.SECRETORPRIVATEKEY);
-        const newAccessToken = jwt.sign(
-          { id: user.id, email: user.email, username: user.username },
-          process.env.SECRETORPRIVATEKEY,
-          { expiresIn: ACCESS_TOKEN_EXPIRATION }
-        );
+        const newAccessToken = getToken(user, ACCESS_TOKEN_EXPIRATION);
         res.cookie(ACCESS_TOKEN, newAccessToken, JWT_COOKIE_PROPS);
         req.session.user = user;
       } catch (error) {}
