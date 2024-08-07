@@ -3,6 +3,8 @@ import { check } from 'express-validator';
 import { isNumber, isString } from '../../../shared/middlewares/shared-validations';
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
 import {
+  addSpecialCar,
+  deleteSpecialCar,
   getSpecialCar,
   getSpecialCarFilters,
   getSpecialCars,
@@ -25,4 +27,14 @@ specialCarsRouter.post(
   '/get-filters',
   [check('mainSerie').custom(isString), validateErrors],
   getSpecialCarFilters
+);
+specialCarsRouter.post(
+  '/add-car',
+  [check('carId').custom(isNumber), validateErrors],
+  addSpecialCar
+);
+specialCarsRouter.post(
+  '/delete-car',
+  [check('carId').custom(isNumber), validateErrors],
+  deleteSpecialCar
 );
