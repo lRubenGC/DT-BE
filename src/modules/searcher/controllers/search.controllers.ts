@@ -16,23 +16,22 @@ import {
 } from '../../user-filters/functions/user-filters.functions';
 import { User } from '../../users/models/users.models';
 import { SEARCH_CARS_PAGE } from '../models/search.constants';
+import { SearchCarPayload } from '../models/search.models';
 
 export const searchCars = async (
-  req: Request<
-    {},
-    {},
-    {
-      query: string;
-      carType?: CAR_TYPE | null;
-      order?: ORDER | null;
-      userProperty?: USER_PROPERTY | null;
-    }
-  >,
+  req: Request<{}, {}, SearchCarPayload>,
   res: Response<
     ResponseDTO<{
       basicCars: BasicCarDTO[];
       premiumCars: PremiumCarDTO[];
       specialCars: SpecialCarDTO[];
+      filters: SearchCarPayload;
+      basicCarsShowed: number;
+      basicCarsOwned: number;
+      premiumCarsShowed: number;
+      premiumCarsOwned: number;
+      specialCarsShowed: number;
+      specialCarsOwned: number;
     }>
   >
 ) => {
@@ -207,10 +206,14 @@ export const searchCars = async (
     //#endregion FINAL QUERIES
 
     //#region CARS MAP
+    let basicCarsOwned = 0;
     const basicCarsDTO: BasicCarDTO[] = basicCars.map(c => {
       const car = c.toJSON();
+      if (car.hasCar) basicCarsOwned++;
       return { ...car, series: car.series.split(',') };
     });
+    const premiumCarsOwned = premiumCars.filter(car => car.toJSON().hasCar).length;
+    const specialCarsOwned = specialCars.filter(car => car.toJSON().hasCar).length;
     //#endregion CARS MAP
 
     return res.json({
@@ -219,6 +222,18 @@ export const searchCars = async (
         basicCars: basicCarsDTO,
         premiumCars,
         specialCars,
+        filters: {
+          query,
+          carType: carTypeToFilter,
+          order: orderToFilter,
+          userProperty: userPropertyToFilter,
+        },
+        basicCarsShowed: basicCarsDTO.length,
+        basicCarsOwned,
+        premiumCarsShowed: premiumCars.length,
+        premiumCarsOwned,
+        specialCarsShowed: specialCars.length,
+        specialCarsOwned,
       },
     });
   } catch (error) {
