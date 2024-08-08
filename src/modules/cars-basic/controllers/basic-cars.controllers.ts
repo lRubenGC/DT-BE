@@ -53,10 +53,10 @@ export const getBasicCars = async (
       [year, mainSerie, exclusiveSerie, userProperty],
       ['year', 'mainSerie', 'exclusiveSerie', 'userProperty']
     )) as {
-      yearToFilter: number | null;
-      mainSerieToFilter: string | null;
-      exclusiveSerieToFilter: string | null;
-      userPropertyToFilter: USER_PROPERTY | null;
+      yearToFilter: number | undefined;
+      mainSerieToFilter: string | undefined;
+      exclusiveSerieToFilter: string | undefined;
+      userPropertyToFilter: USER_PROPERTY | undefined;
     };
     //#endregion FILTERS STORAGED
 

@@ -49,9 +49,9 @@ export const getSpecialCars = async (
         [mainSerie, secondarySerie, userProperty],
         ['mainSerie', 'secondarySerie', 'userProperty']
       )) as {
-        mainSerieToFilter: string | null;
-        secondarySerieToFilter: string | null;
-        userPropertyToFilter: USER_PROPERTY | null;
+        mainSerieToFilter: string | undefined;
+        secondarySerieToFilter: string | undefined;
+        userPropertyToFilter: USER_PROPERTY | undefined;
       };
     //#endregion FILTERS STORAGED
 

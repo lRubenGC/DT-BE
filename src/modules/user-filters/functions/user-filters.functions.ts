@@ -13,7 +13,7 @@ export const getFilters = async <TValue>(
   page: string,
   filterValues: (undefined | null | TValue)[],
   filterNames: string[]
-): Promise<{ [key: string]: TValue | null }> => {
+): Promise<{ [key: string]: TValue | null | undefined }> => {
   if (!user) {
     return filterNames.reduce<{ [key: string]: TValue | null }>((acc, name, index) => {
       acc[`${name}ToFilter`] = filterValues[index] ?? null;
