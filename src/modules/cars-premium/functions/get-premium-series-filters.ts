@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 
-export const getPremiumSeriesFilters = (secondarySerie: string | null) => {
+export const getPremiumSeriesFilters = (secondarySerie: string | null | undefined) => {
   const filters = secondarySerie
     ? [
         {

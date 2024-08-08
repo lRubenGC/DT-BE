@@ -1,8 +1,8 @@
 import { Op } from 'sequelize';
 
 export const getBasicSeriesFilters = (
-  mainSerie: string | null,
-  exclusiveSerie: string | null
+  mainSerie: string | null | undefined,
+  exclusiveSerie: string | null | undefined
 ) => {
   const filters = [];
   if (mainSerie) {
