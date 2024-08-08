@@ -13,6 +13,8 @@ export enum ERROR {
   CAR_NOT_FOUND = 9,
   USER_NOT_LOGGED_IN = 10,
   USER_ALREADY_HAS_CAR = 11,
+  USER_NOT_FOUND = 12,
+  FORM_UNCHANGED = 13,
 }
 
 export const ERROR_MESSAGE: { [key in ERROR]: string } = {
@@ -27,6 +29,8 @@ export const ERROR_MESSAGE: { [key in ERROR]: string } = {
   [ERROR.CAR_NOT_FOUND]: 'Car not found',
   [ERROR.USER_NOT_LOGGED_IN]: 'User not logged in',
   [ERROR.USER_ALREADY_HAS_CAR]: 'Car has already been added to user',
+  [ERROR.USER_NOT_FOUND]: 'User not found',
+  [ERROR.FORM_UNCHANGED]: 'There are no changes in form',
 };
 
 export const getError = (
