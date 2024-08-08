@@ -20,6 +20,7 @@ import {
   SPECIAL_CARS_ROUTE,
   specialCarsRouter,
 } from '../modules/cars-special/routes/special-cars.routes';
+import { SEARCH_ROUTE, searchRouter } from '../modules/searcher/routes/search.routes';
 import { SEQUELIZE } from './server.constants';
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -91,6 +92,7 @@ export class Server {
     this.app.use(AUTH_ROUTE, authRouter);
     this.app.use(BASIC_CARS_ROUTE, basicCarsRouter);
     this.app.use(PREMIUM_CARS_ROUTE, premiumCarsRouter);
+    this.app.use(SEARCH_ROUTE, searchRouter);
     this.app.use(SPECIAL_CARS_ROUTE, specialCarsRouter);
   }
 
