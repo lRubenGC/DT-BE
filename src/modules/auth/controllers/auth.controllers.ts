@@ -23,7 +23,7 @@ export const login = async (
     if (!user) {
       return getError(res, 401, ERROR.BAD_LOGIN);
     }
-    const validPassword = bcryptjs.compareSync(password.toString(), user.password);
+    const validPassword = bcryptjs.compareSync(password, user.password);
     if (!validPassword) {
       return getError(res, 401, ERROR.BAD_LOGIN);
     }
