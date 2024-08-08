@@ -19,7 +19,7 @@ export const login = async (
 ) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email, status: 1 } });
     if (!user) {
       return getError(res, 401, ERROR.BAD_LOGIN);
     }
