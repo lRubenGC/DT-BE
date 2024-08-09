@@ -1,6 +1,8 @@
 import { DataTypes, Model } from 'sequelize';
 import { SEQUELIZE } from '../../../server/server.constants';
+import { CAR_TYPE, USER_PROPERTY } from '../../../shared/models/cars.models';
 
+//#region SEQUELIZE
 export class User extends Model {
   id!: number;
   username!: string;
@@ -12,7 +14,6 @@ export class User extends Model {
   img?: string;
   csvDownloadDate?: Date | null;
 }
-
 User.init(
   {
     id: {
@@ -56,8 +57,17 @@ User.init(
     timestamps: false,
   }
 );
+//#endregion SEQUELIZE
 
 User.prototype.toJSON = function () {
   const { password, ...user } = this.get({ plain: true });
   return user;
 };
+
+export interface getUserProfilePayload {
+  username: string;
+  carType?: CAR_TYPE | null;
+  userProperty?: USER_PROPERTY | null;
+  mainFilter?: string | number | null;
+  secondaryFilter?: string | null;
+}

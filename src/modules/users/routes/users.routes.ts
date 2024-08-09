@@ -1,10 +1,15 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { isString } from '../../../shared/middlewares/shared-validations';
 import { validateErrors } from '../../../shared/middlewares/validate-errors';
-import { updateUser } from '../controllers/users.controllers';
+import { getUserProfileCars, updateUser } from '../controllers/users.controllers';
+import { validCarType } from '../../../shared/middlewares/validate-filters';
 
 export const usersRouter = Router();
 export const USERS_ROUTE = '/api/users';
 
 usersRouter.post('/update', [], updateUser);
+usersRouter.post(
+  '/get-profile-cars',
+  [check('carType').custom(validCarType), validateErrors],
+  getUserProfileCars
+);

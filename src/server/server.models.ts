@@ -20,7 +20,7 @@ import {
   SPECIAL_CARS_ROUTE,
   specialCarsRouter,
 } from '../modules/cars-special/routes/special-cars.routes';
-import { SEARCH_ROUTE, searchRouter } from '../modules/searcher/routes/search.routes';
+import { SEARCH_ROUTE, searchRouter } from '../modules/search/routes/search.routes';
 import { USERS_ROUTE, usersRouter } from '../modules/users/routes/users.routes';
 import { SEQUELIZE } from './server.constants';
 const jwt = require('jsonwebtoken');
