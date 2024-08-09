@@ -209,3 +209,57 @@ export const getUserProfileCars = async (
     return getError(res, 500, ERROR.SERVER_ERROR, null, error);
   }
 };
+
+export const getUserProfileStats = async (
+  req: Request<{}, {}, { username: string }>,
+  res: Response<
+    ResponseDTO<{
+      basicCars: number;
+      premiumCars: number;
+      specialCars: number;
+    }>
+  >
+) => {
+  try {
+    //#region READONLY
+    const { username } = req.body;
+    //#endregion READONLY
+
+    //#region VALIDATIONS
+    const userProfile = await User.findOne({ where: { username } });
+    if (!userProfile) return getError(res, 400, ERROR.CAR_NOT_FOUND);
+    //#endregion VALIDATIONS
+
+    //#region FINAL QUERIES
+    const basicCars = await UserBasicCar.count({
+      where: {
+        UserId: userProfile.id,
+        hasCar: true,
+      },
+    });
+    const premiumCars = await UserPremiumCar.count({
+      where: {
+        UserId: userProfile.id,
+        hasCar: true,
+      },
+    });
+    const specialCars = await UserSpecialCar.count({
+      where: {
+        UserId: userProfile.id,
+        hasCar: true,
+      },
+    });
+    //#endregion FINAL QUERIES
+
+    return res.json({
+      ok: true,
+      data: {
+        basicCars,
+        premiumCars,
+        specialCars,
+      },
+    });
+  } catch (error) {
+    return getError(res, 500, ERROR.SERVER_ERROR, null, error);
+  }
+};
