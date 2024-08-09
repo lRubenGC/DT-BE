@@ -13,7 +13,7 @@ export class BasicCar extends Model {
   exclusive_serie!: string | null;
   col_serie!: string;
   year!: number;
-  brand!: string | null;
+  brand!: string;
   img!: string;
   hasCar!: number;
   wantsCar!: number;

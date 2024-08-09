@@ -1,4 +1,5 @@
 import { Sequelize, WhereOptions } from 'sequelize';
+import { getBasicSeriesFilters } from '../../cars-basic/functions/get-basic-series-filters';
 import { UserBasicCar } from '../../cars-basic/models/basic-cars-relations.models';
 import {
   BasicCar,
@@ -18,7 +19,7 @@ import {
   SpecialCarsGrouped,
 } from '../../cars-special/models/special-cars.models';
 import { User } from '../models/users.models';
-import { getBasicSeriesFilters } from '../../cars-basic/functions/get-basic-series-filters';
+import { CAR_TYPE, USER_PROPERTY } from '../../../shared/models/cars.models';
 
 export const getUserBasicCars = async (
   userPropertyFilter: any,
@@ -26,7 +27,7 @@ export const getUserBasicCars = async (
   secondaryFilter: string | undefined,
   userProfileId: number,
   userVisitorId?: number
-): Promise<BasicCarsGrouped> => {
+): Promise<{ cars: BasicCarsGrouped; secondaryFilters: string[] }> => {
   const coreFilters: WhereOptions = {
     year: mainFilter,
     ...getBasicSeriesFilters(secondaryFilter, null),
@@ -73,15 +74,22 @@ export const getUserBasicCars = async (
     });
   }
 
-  return cars.reduce<BasicCarsGrouped>((acc, item) => {
-    const car: BasicCar = item.toJSON();
-    const key = car.series.split(',')[0];
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push({ ...car, series: car.series.split(',') } as BasicCarDTO);
-    return acc;
-  }, {});
+  return cars.reduce<{ cars: BasicCarsGrouped; secondaryFilters: string[] }>(
+    ({ cars, secondaryFilters }, item) => {
+      const car: BasicCar = item.toJSON();
+      const key = car.series.split(',')[0];
+      if (!cars[key]) {
+        cars[key] = [];
+      }
+      const carDTO: BasicCarDTO = { ...car, series: car.series.split(',') };
+      cars[key].push(carDTO);
+      if (!secondaryFilters.includes(carDTO.series[0])) {
+        secondaryFilters.push(carDTO.series[0]);
+      }
+      return { cars, secondaryFilters };
+    },
+    { cars: {}, secondaryFilters: [] }
+  );
 };
 
 export const getUserPremiumCars = async (
@@ -90,7 +98,7 @@ export const getUserPremiumCars = async (
   secondaryFilter: string | undefined,
   userProfileId: number,
   userVisitorId?: number
-): Promise<PremiumCarsGrouped> => {
+): Promise<{ cars: PremiumCarsGrouped; secondaryFilters: string[] }> => {
   const coreFilters: WhereOptions = {
     main_serie: mainFilter,
     ...getPremiumSeriesFilters(secondaryFilter),
@@ -137,14 +145,20 @@ export const getUserPremiumCars = async (
     });
   }
 
-  return cars.reduce<PremiumCarsGrouped>((acc, item) => {
-    const car: PremiumCar = item.toJSON();
-    if (!acc[car.secondary_serie]) {
-      acc[car.secondary_serie] = [];
-    }
-    acc[car.secondary_serie].push(car);
-    return acc;
-  }, {});
+  return cars.reduce<{ cars: PremiumCarsGrouped; secondaryFilters: string[] }>(
+    ({ cars, secondaryFilters }, item) => {
+      const car: PremiumCar = item.toJSON();
+      if (!cars[car.secondary_serie]) {
+        cars[car.secondary_serie] = [];
+      }
+      cars[car.secondary_serie].push(car);
+      if (!secondaryFilters.includes(car.secondary_serie)) {
+        secondaryFilters.push(car.secondary_serie);
+      }
+      return { cars, secondaryFilters };
+    },
+    { cars: {}, secondaryFilters: [] }
+  );
 };
 
 export const getUserSpecialCars = async (
@@ -153,7 +167,7 @@ export const getUserSpecialCars = async (
   secondaryFilter: string | undefined,
   userProfileId: number,
   userVisitorId?: number
-): Promise<SpecialCarsGrouped> => {
+): Promise<{ cars: SpecialCarsGrouped; secondaryFilters: string[] }> => {
   const coreFilters: WhereOptions = {
     main_serie: mainFilter,
     ...getSpecialSeriesFilters(secondaryFilter),
@@ -200,12 +214,62 @@ export const getUserSpecialCars = async (
     });
   }
 
-  return cars.reduce<SpecialCarsGrouped>((acc, item) => {
-    const car: SpecialCar = item.toJSON();
-    if (!acc[car.secondary_serie]) {
-      acc[car.secondary_serie] = [];
-    }
-    acc[car.secondary_serie].push(car);
-    return acc;
-  }, {});
+  return cars.reduce<{ cars: SpecialCarsGrouped; secondaryFilters: string[] }>(
+    ({ cars, secondaryFilters }, item) => {
+      const car: SpecialCar = item.toJSON();
+      if (!cars[car.secondary_serie]) {
+        cars[car.secondary_serie] = [];
+      }
+      cars[car.secondary_serie].push(car);
+      if (!secondaryFilters.includes(car.secondary_serie)) {
+        secondaryFilters.push(car.secondary_serie);
+      }
+      return { cars, secondaryFilters };
+    },
+    { cars: {}, secondaryFilters: [] }
+  );
+};
+
+export const getMainFilters = async (
+  carType: CAR_TYPE,
+  userProperty: USER_PROPERTY,
+  UserId: number
+): Promise<number[] | string[]> => {
+  const propertyFilter =
+    userProperty === USER_PROPERTY.OWNED ? { hasCar: true } : { wantsCar: true };
+  switch (carType) {
+    case 'basic':
+      const userBasicCars = await UserBasicCar.findAll({
+        where: { UserId, ...propertyFilter },
+      });
+      const basicCarIds = userBasicCars.map(car => car.BasicCarId);
+      const basicCars = await BasicCar.findAll({
+        where: { id: basicCarIds },
+        attributes: ['year'],
+      });
+      const uniqueYears = [...new Set(basicCars.map(car => car.year))];
+      return uniqueYears.sort((a: number, b: number) => b - a);
+    case 'premium':
+      const userPremiumCars = await UserPremiumCar.findAll({
+        where: { UserId, ...propertyFilter },
+      });
+      const premiumCarIds = userPremiumCars.map(car => car.PremiumCarId);
+      const premiumCars = await PremiumCar.findAll({
+        where: { id: premiumCarIds },
+        attributes: ['main_serie'],
+      });
+      const uniquePremiumSeries = [...new Set(premiumCars.map(car => car.main_serie))];
+      return uniquePremiumSeries.sort();
+    case 'special':
+      const userSpecialCars = await UserSpecialCar.findAll({
+        where: { UserId, ...propertyFilter },
+      });
+      const specialCarIds = userSpecialCars.map(car => car.SpecialCarId);
+      const specialCars = await SpecialCar.findAll({
+        where: { id: specialCarIds },
+        attributes: ['main_serie'],
+      });
+      const uniqueSpecialSeries = [...new Set(specialCars.map(car => car.main_serie))];
+      return uniqueSpecialSeries.sort();
+  }
 };

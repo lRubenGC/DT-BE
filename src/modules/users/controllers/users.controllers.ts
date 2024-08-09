@@ -3,16 +3,13 @@ import { CAR_TYPE, USER_PROPERTY } from '../../../shared/models/cars.models';
 import { ERROR, getError } from '../../../shared/models/errors.models';
 import { ResponseDTO } from '../../../shared/models/response.models';
 import { UserBasicCar } from '../../cars-basic/models/basic-cars-relations.models';
-import { BASIC_DEFAULT_YEAR } from '../../cars-basic/models/basic-cars.constants';
 import { BasicCar, BasicCarsGrouped } from '../../cars-basic/models/basic-cars.models';
 import { UserPremiumCar } from '../../cars-premium/models/premium-cars-relations.models';
-import { PREMIUM_DEFAULT_MAIN_SERIE } from '../../cars-premium/models/premium-cars.constants';
 import {
   PremiumCar,
   PremiumCarsGrouped,
 } from '../../cars-premium/models/premium-cars.models';
 import { UserSpecialCar } from '../../cars-special/models/special-cars-relations.models';
-import { SPECIAL_DEFAULT_MAIN_SERIE } from '../../cars-special/models/special-cars.constants';
 import {
   SpecialCar,
   SpecialCarsGrouped,
@@ -23,6 +20,7 @@ import {
 } from '../../user-filters/functions/user-filters.functions';
 import { getUserProfilePayload, User } from '../../users/models/users.models';
 import {
+  getMainFilters,
   getUserBasicCars,
   getUserPremiumCars,
   getUserSpecialCars,
@@ -95,12 +93,14 @@ export const updateUser = async (
   }
 };
 
-export const getUserProfileCars = async (
+export const getUserProfile = async (
   req: Request<{}, {}, getUserProfilePayload>,
   res: Response<
     ResponseDTO<{
       user: User;
       cars: BasicCarsGrouped | PremiumCarsGrouped | SpecialCarsGrouped;
+      mainFilters: string[] | number[];
+      secondaryFilters: string[];
       filters: getUserProfilePayload;
     }>
   >
@@ -146,13 +146,12 @@ export const getUserProfileCars = async (
     //#region DEFAULT FILTERS
     const finalCarType: CAR_TYPE = carTypeToFilter ?? 'basic';
     const finalUserProperty: USER_PROPERTY = userPropertyToFilter ?? USER_PROPERTY.OWNED;
-    const finalMainFilter =
-      mainFilterToFilter ??
-      (finalCarType === 'basic'
-        ? BASIC_DEFAULT_YEAR
-        : finalCarType === 'premium'
-          ? PREMIUM_DEFAULT_MAIN_SERIE
-          : SPECIAL_DEFAULT_MAIN_SERIE);
+    const mainFilters = await getMainFilters(
+      finalCarType,
+      finalUserProperty,
+      userProfile.id
+    );
+    const finalMainFilter = mainFilterToFilter ?? mainFilters[0];
     //#endregion DEFAULT FILTERS
 
     //#region FILTERS QUERIES
@@ -165,7 +164,7 @@ export const getUserProfileCars = async (
     //#endregion FILTERS QUERIES
 
     //#region FINAL QUERIES
-    const cars =
+    const { cars, secondaryFilters } =
       finalCarType === 'premium'
         ? await getUserPremiumCars(
             userPropertyFilter,
@@ -196,6 +195,8 @@ export const getUserProfileCars = async (
       data: {
         user: userProfile,
         cars,
+        mainFilters,
+        secondaryFilters: secondaryFilters.sort(),
         filters: {
           username,
           carType: finalCarType,
@@ -210,7 +211,7 @@ export const getUserProfileCars = async (
   }
 };
 
-export const getUserProfileStats = async (
+export const getUserStats = async (
   req: Request<{}, {}, { username: string }>,
   res: Response<
     ResponseDTO<{
