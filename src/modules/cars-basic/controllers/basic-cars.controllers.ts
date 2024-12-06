@@ -184,13 +184,13 @@ export const getBasicCarFilters = async (
   req: Request<{}, {}, { year: number }>,
   res: Response<ResponseDTO<BasicCarFiltersResponse>>
 ) => {
+  const main = req.body.year;
+  if (!main) return getError(res, 400, ERROR.BAD_PAYLOAD, ['year']);
   return res.json({
     ok: true,
     data: {
       year: BASIC_CARS_YEARS_AVAILABLE,
-      ...getBasicCarsFiltersSeries(
-        await AvailableSeries.findOne({ where: { main: req.body.year } })
-      ),
+      ...getBasicCarsFiltersSeries(await AvailableSeries.findOne({ where: { main } })),
       userProperty: AVAILABLE_USER_PROPERTY_FILTERS,
     },
   });
